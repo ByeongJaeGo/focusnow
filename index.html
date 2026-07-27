@@ -92,9 +92,16 @@
       backdrop-filter: blur(8px);
     }
 
-    .ghost-btn:hover {
-      background: #fff;
-      border-color: rgba(26, 29, 26, 0.22);
+    .ghost-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .ghost-btn.primary:hover {
+      filter: brightness(1.06);
+      background: var(--accent);
+      border-color: var(--accent);
     }
 
     .stage {
@@ -542,6 +549,7 @@
   <div class="topbar" id="topbar">
     <p class="welcome hidden" id="welcome"><strong id="user-name"></strong>님</p>
     <button type="button" class="ghost-btn" id="open-auth">로그인</button>
+    <button type="button" class="ghost-btn primary" id="open-signup">등록하기</button>
     <button type="button" class="ghost-btn hidden" id="logout">로그아웃</button>
   </div>
 
@@ -653,6 +661,7 @@
     const userNameEl = document.getElementById("user-name");
     const welcomeEl = document.getElementById("welcome");
     const openAuthBtn = document.getElementById("open-auth");
+    const openSignupBtn = document.getElementById("open-signup");
     const logoutBtn = document.getElementById("logout");
     const topbar = document.getElementById("topbar");
 
@@ -793,11 +802,13 @@
         userNameEl.textContent = user.name;
         welcomeEl.classList.remove("hidden");
         openAuthBtn.classList.add("hidden");
+        openSignupBtn.classList.add("hidden");
         logoutBtn.classList.remove("hidden");
       } else {
         userNameEl.textContent = "";
         welcomeEl.classList.add("hidden");
         openAuthBtn.classList.remove("hidden");
+        openSignupBtn.classList.remove("hidden");
         logoutBtn.classList.add("hidden");
       }
     }
@@ -1033,6 +1044,11 @@
     openAuthBtn.addEventListener("click", () => {
       showAuth();
       switchTab("login");
+    });
+
+    openSignupBtn.addEventListener("click", () => {
+      showAuth();
+      switchTab("signup");
     });
 
     logoutBtn.addEventListener("click", () => {
