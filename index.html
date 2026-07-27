@@ -533,6 +533,152 @@
       font-weight: 600;
     }
 
+    .archive-streak {
+      margin-top: 0;
+      padding: 0.85rem 0.9rem;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--line);
+      font-size: 0.9rem;
+    }
+
+    .calendar {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--line);
+      padding: 1rem 0.85rem 1.1rem;
+    }
+
+    .cal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.85rem;
+    }
+
+    .cal-title {
+      font-family: "Syne", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .cal-nav {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.75);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .cal-nav:hover {
+      background: #fff;
+    }
+
+    .cal-week {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.2rem;
+      margin-bottom: 0.35rem;
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .cal-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.25rem;
+    }
+
+    .cal-day {
+      aspect-ratio: 1;
+      border: none;
+      background: transparent;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.82rem;
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .cal-day:hover:not(:disabled) {
+      background: rgba(47, 107, 79, 0.1);
+    }
+
+    .cal-day:disabled {
+      color: transparent;
+      cursor: default;
+    }
+
+    .cal-day.has-entry::after {
+      content: "";
+      position: absolute;
+      bottom: 0.22rem;
+      width: 0.28rem;
+      height: 0.28rem;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .cal-day.selected {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .cal-day.selected.has-entry::after {
+      background: #fff;
+    }
+
+    .cal-day.today:not(.selected) {
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .archive-detail {
+      width: 100%;
+      min-height: 12rem;
+      text-align: center;
+    }
+
+    .archive-date {
+      font-family: "Syne", sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .archive-photo {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.45);
+      display: block;
+    }
+
+    .archive-caption {
+      margin-top: 0.85rem;
+      font-size: 1.02rem;
+      font-weight: 500;
+      line-height: 1.45;
+    }
+
+    .archive-empty {
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding: 2.5rem 1rem;
+      border: 1px dashed var(--line);
+      background: rgba(255, 255, 255, 0.35);
+    }
+
     .hidden {
       display: none !important;
     }
@@ -572,6 +718,7 @@
 <body>
   <div class="topbar" id="topbar">
     <p class="welcome hidden" id="welcome"><strong id="user-name"></strong>님</p>
+    <button type="button" class="ghost-btn hidden" id="open-archive">보관함</button>
     <button type="button" class="ghost-btn" id="open-auth">로그인</button>
     <button type="button" class="ghost-btn hidden" id="logout">로그아웃</button>
   </div>
@@ -667,6 +814,33 @@
     </section>
   </main>
 
+  <!-- 보관함 -->
+  <main class="stage hidden" id="archive-view">
+    <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
+    <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
+
+    <p class="streak archive-streak" id="archive-streak" aria-live="polite"></p>
+
+    <section class="calendar" aria-label="기록 캘린더">
+      <div class="cal-head">
+        <button type="button" class="cal-nav" id="cal-prev" aria-label="이전 달">‹</button>
+        <h2 class="cal-title" id="cal-title">2026년 7월</h2>
+        <button type="button" class="cal-nav" id="cal-next" aria-label="다음 달">›</button>
+      </div>
+      <div class="cal-week" aria-hidden="true">
+        <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+      </div>
+      <div class="cal-days" id="cal-days"></div>
+    </section>
+
+    <section class="archive-detail" id="archive-detail">
+      <p class="archive-date" id="archive-date"></p>
+      <img class="archive-photo hidden" id="archive-photo" alt="그날의 사진" />
+      <p class="archive-caption hidden" id="archive-caption"></p>
+      <p class="archive-empty" id="archive-empty">날짜를 선택하면 기록이 보여요</p>
+    </section>
+  </main>
+
   <script>
     const USERS_KEY = "focusnow_users";
     const SESSION_KEY = "focusnow_session";
@@ -674,6 +848,7 @@
 
     const authView = document.getElementById("auth-view");
     const appView = document.getElementById("app-view");
+    const archiveView = document.getElementById("archive-view");
     const tabLogin = document.getElementById("tab-login");
     const tabSignup = document.getElementById("tab-signup");
     const loginForm = document.getElementById("login-form");
@@ -686,6 +861,7 @@
     const userNameEl = document.getElementById("user-name");
     const welcomeEl = document.getElementById("welcome");
     const openAuthBtn = document.getElementById("open-auth");
+    const openArchiveBtn = document.getElementById("open-archive");
     const logoutBtn = document.getElementById("logout");
     const topbar = document.getElementById("topbar");
     const registerBtn = document.getElementById("register-btn");
@@ -698,29 +874,103 @@
     const caption = document.getElementById("caption");
     const charCount = document.getElementById("char-count");
     const streakEl = document.getElementById("streak");
+    const archiveStreakEl = document.getElementById("archive-streak");
+    const calTitle = document.getElementById("cal-title");
+    const calDays = document.getElementById("cal-days");
+    const calPrev = document.getElementById("cal-prev");
+    const calNext = document.getElementById("cal-next");
+    const archiveDateEl = document.getElementById("archive-date");
+    const archivePhoto = document.getElementById("archive-photo");
+    const archiveCaption = document.getElementById("archive-caption");
+    const archiveEmpty = document.getElementById("archive-empty");
 
     let idChecked = false;
     let idAvailable = false;
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
+    let selectedDate = todayKeySafe();
+
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function formatDateKey(d) {
+      return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+    }
+
+    function todayKeySafe() {
+      return formatDateKey(new Date());
+    }
 
     function todayKey() {
-      const d = new Date();
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return y + "-" + m + "-" + day;
+      return todayKeySafe();
     }
 
     function yesterdayKey() {
       const d = new Date();
       d.setDate(d.getDate() - 1);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return y + "-" + m + "-" + day;
+      return formatDateKey(d);
+    }
+
+    function formatDisplayDate(dateKey) {
+      const parts = dateKey.split("-");
+      if (parts.length !== 3) return dateKey;
+      return parts[0] + "년 " + Number(parts[1]) + "월 " + Number(parts[2]) + "일";
     }
 
     function streakKey(userId) {
       return "focusnow_streak_" + userId;
+    }
+
+    function archiveKey(userId) {
+      return "focusnow_archive_" + userId;
+    }
+
+    function legacyPostKey(userId) {
+      return "focusnow_post_" + userId;
+    }
+
+    function getArchive(userId) {
+      try {
+        const raw = localStorage.getItem(archiveKey(userId));
+        if (raw) return JSON.parse(raw) || {};
+      } catch (_) {}
+
+      // 이전 단일 저장본 → 오늘 날짜로 이전
+      try {
+        const legacy = localStorage.getItem(legacyPostKey(userId));
+        if (legacy) {
+          const data = JSON.parse(legacy);
+          const migrated = {};
+          if (data && (data.image || (data.caption && String(data.caption).trim()))) {
+            migrated[todayKey()] = {
+              image: data.image || "",
+              caption: String(data.caption || "").slice(0, CAPTION_MAX)
+            };
+            localStorage.setItem(archiveKey(userId), JSON.stringify(migrated));
+          }
+          return migrated;
+        }
+      } catch (_) {}
+      return {};
+    }
+
+    function saveArchive(userId, archive) {
+      localStorage.setItem(archiveKey(userId), JSON.stringify(archive));
+    }
+
+    function getDayEntry(userId, dateKey) {
+      const archive = getArchive(userId);
+      return archive[dateKey] || null;
+    }
+
+    function setDayEntry(userId, dateKey, data) {
+      const archive = getArchive(userId);
+      archive[dateKey] = {
+        image: data.image || "",
+        caption: String(data.caption || "").slice(0, CAPTION_MAX)
+      };
+      saveArchive(userId, archive);
     }
 
     function getStreakData(userId) {
@@ -740,7 +990,6 @@
       const today = todayKey();
       const yesterday = yesterdayKey();
       if (!data.lastDate || data.streak < 1) return 0;
-      // 오늘 또는 어제까지 이어진 경우만 연속으로 인정
       if (data.lastDate === today || data.lastDate === yesterday) return data.streak;
       return 0;
     }
@@ -751,7 +1000,6 @@
       const data = getStreakData(userId);
 
       if (data.lastDate === today) {
-        // 오늘 이미 기록함 → 유지
         if (data.streak < 1) data.streak = 1;
       } else if (data.lastDate === yesterday) {
         data.streak = (data.streak || 0) + 1;
@@ -764,16 +1012,22 @@
       return data.streak;
     }
 
+    function streakText(user) {
+      const days = getDisplayStreak(user.id);
+      return user.name + "님은 현재 <strong>" + days + "일</strong> 연속으로 소중한 하루를 기록중 입니다.";
+    }
+
     function updateStreakMessage(user) {
       if (!user) {
         streakEl.classList.add("hidden");
         streakEl.textContent = "";
+        archiveStreakEl.textContent = "";
         return;
       }
-      const days = getDisplayStreak(user.id);
-      streakEl.innerHTML =
-        user.name + "님은 현재 <strong>" + days + "일</strong> 연속으로 소중한 하루를 기록중 입니다.";
+      const html = streakText(user);
+      streakEl.innerHTML = html;
       streakEl.classList.remove("hidden");
+      archiveStreakEl.innerHTML = html;
     }
 
     function getUsers() {
@@ -804,10 +1058,6 @@
       localStorage.setItem(SESSION_KEY, JSON.stringify({ id: user.id, name: user.name }));
     }
 
-    function postKey(userId) {
-      return "focusnow_post_" + userId;
-    }
-
     function normalizeId(id) {
       return String(id || "").trim().toLowerCase();
     }
@@ -827,18 +1077,26 @@
       if (user) {
         userNameEl.textContent = user.name;
         welcomeEl.classList.remove("hidden");
+        openArchiveBtn.classList.remove("hidden");
         openAuthBtn.classList.add("hidden");
         logoutBtn.classList.remove("hidden");
       } else {
         userNameEl.textContent = "";
         welcomeEl.classList.add("hidden");
+        openArchiveBtn.classList.add("hidden");
         openAuthBtn.classList.remove("hidden");
         logoutBtn.classList.add("hidden");
       }
     }
 
-    function showAuth() {
+    function hideAllViews() {
       appView.classList.add("hidden");
+      authView.classList.add("hidden");
+      archiveView.classList.add("hidden");
+    }
+
+    function showAuth() {
+      hideAllViews();
       authView.classList.remove("hidden");
       topbar.classList.add("hidden");
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -846,12 +1104,12 @@
 
     /** 홈 = 사진 올리고 한 줄 쓰는 공간 */
     function showHome(user) {
-      authView.classList.add("hidden");
+      hideAllViews();
       appView.classList.remove("hidden");
       topbar.classList.remove("hidden");
       updateTopbar(user || null);
       if (user) {
-        loadPost(user.id);
+        loadTodayPost(user.id);
         updateStreakMessage(user);
       } else {
         clearImageUi();
@@ -859,6 +1117,25 @@
         updateCharCount();
         updateStreakMessage(null);
       }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showArchive(user) {
+      if (!user) {
+        requireLogin();
+        return;
+      }
+      hideAllViews();
+      archiveView.classList.remove("hidden");
+      topbar.classList.remove("hidden");
+      updateTopbar(user);
+      updateStreakMessage(user);
+      const now = new Date();
+      calYear = now.getFullYear();
+      calMonth = now.getMonth();
+      selectedDate = todayKey();
+      renderCalendar(user.id);
+      showArchiveDay(user.id, selectedDate);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -931,10 +1208,10 @@
         caption: caption.value
       };
       try {
-        localStorage.setItem(postKey(session.id), JSON.stringify(data));
+        setDayEntry(session.id, todayKey(), data);
       } catch (_) {
         try {
-          localStorage.setItem(postKey(session.id), JSON.stringify({ image: "", caption: data.caption }));
+          setDayEntry(session.id, todayKey(), { image: "", caption: data.caption });
         } catch (__) {
           return false;
         }
@@ -948,20 +1225,89 @@
       return true;
     }
 
-    function loadPost(userId) {
+    function loadTodayPost(userId) {
       clearImageUi();
       caption.value = "";
-      try {
-        const raw = localStorage.getItem(postKey(userId));
-        if (!raw) {
-          updateCharCount();
-          return;
-        }
-        const data = JSON.parse(raw);
+      const data = getDayEntry(userId, todayKey());
+      if (data) {
         if (data.image) setImage(data.image);
         if (typeof data.caption === "string") caption.value = data.caption.slice(0, CAPTION_MAX);
-      } catch (_) {}
+      }
       updateCharCount();
+    }
+
+    function renderCalendar(userId) {
+      const archive = getArchive(userId);
+      calTitle.textContent = calYear + "년 " + (calMonth + 1) + "월";
+      calDays.innerHTML = "";
+
+      const first = new Date(calYear, calMonth, 1);
+      const startPad = first.getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const today = todayKey();
+
+      for (let i = 0; i < startPad; i++) {
+        const empty = document.createElement("button");
+        empty.type = "button";
+        empty.className = "cal-day";
+        empty.disabled = true;
+        calDays.appendChild(empty);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = calYear + "-" + pad2(calMonth + 1) + "-" + pad2(day);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "cal-day";
+        btn.textContent = String(day);
+        btn.dataset.date = dateKey;
+
+        if (archive[dateKey] && (archive[dateKey].image || (archive[dateKey].caption || "").trim())) {
+          btn.classList.add("has-entry");
+        }
+        if (dateKey === today) btn.classList.add("today");
+        if (dateKey === selectedDate) btn.classList.add("selected");
+
+        btn.addEventListener("click", () => {
+          selectedDate = dateKey;
+          renderCalendar(userId);
+          showArchiveDay(userId, dateKey);
+        });
+        calDays.appendChild(btn);
+      }
+    }
+
+    function showArchiveDay(userId, dateKey) {
+      archiveDateEl.textContent = formatDisplayDate(dateKey);
+      const entry = getDayEntry(userId, dateKey);
+      const hasContent = entry && (entry.image || (entry.caption || "").trim());
+
+      if (!hasContent) {
+        archivePhoto.classList.add("hidden");
+        archivePhoto.removeAttribute("src");
+        archiveCaption.classList.add("hidden");
+        archiveCaption.textContent = "";
+        archiveEmpty.classList.remove("hidden");
+        archiveEmpty.textContent = "이 날에는 기록이 없어요";
+        return;
+      }
+
+      archiveEmpty.classList.add("hidden");
+      if (entry.image) {
+        archivePhoto.src = entry.image;
+        archivePhoto.classList.remove("hidden");
+      } else {
+        archivePhoto.classList.add("hidden");
+        archivePhoto.removeAttribute("src");
+      }
+
+      if ((entry.caption || "").trim()) {
+        archiveCaption.textContent = entry.caption;
+        archiveCaption.classList.remove("hidden");
+      } else {
+        archiveCaption.classList.add("hidden");
+        archiveCaption.textContent = "";
+      }
     }
 
     tabLogin.addEventListener("click", () => switchTab("login"));
@@ -1071,6 +1417,32 @@
     openAuthBtn.addEventListener("click", () => {
       showAuth();
       switchTab("login");
+    });
+
+    openArchiveBtn.addEventListener("click", () => {
+      showArchive(currentUser());
+    });
+
+    calPrev.addEventListener("click", () => {
+      const user = currentUser();
+      if (!user) return;
+      calMonth -= 1;
+      if (calMonth < 0) {
+        calMonth = 11;
+        calYear -= 1;
+      }
+      renderCalendar(user.id);
+    });
+
+    calNext.addEventListener("click", () => {
+      const user = currentUser();
+      if (!user) return;
+      calMonth += 1;
+      if (calMonth > 11) {
+        calMonth = 0;
+        calYear += 1;
+      }
+      renderCalendar(user.id);
     });
 
     registerBtn.addEventListener("click", () => {
