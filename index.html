@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>focusnow</title>
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xsuaolun00");
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Syne:wght@600;700&display=swap" rel="stylesheet" />
@@ -40,6 +47,54 @@
       place-items: center;
       padding: 2.5rem 1.25rem 3rem;
       overflow-x: hidden;
+      position: relative;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 1.1rem;
+      right: 1.1rem;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.65rem;
+      margin: 0;
+      width: auto;
+      animation: fade-in 0.8s ease 0.1s both;
+    }
+
+    .welcome {
+      font-size: 0.9rem;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid var(--line);
+      padding: 0.35rem 0.65rem;
+      border-radius: 2px;
+    }
+
+    .welcome strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .ghost-btn {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .ghost-btn:hover {
+      background: #fff;
+      border-color: rgba(26, 29, 26, 0.22);
     }
 
     .stage {
@@ -101,43 +156,6 @@
       color: var(--ink);
       font-weight: 500;
       margin-bottom: 0.35rem;
-    }
-
-    .topbar {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      margin-top: -0.5rem;
-    }
-
-    .welcome {
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-
-    .welcome strong {
-      color: var(--ink);
-      font-weight: 600;
-    }
-
-    .ghost-btn {
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.45);
-      color: var(--ink);
-      font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 0.4rem 0.75rem;
-      border-radius: 2px;
-      cursor: pointer;
-      transition: background 0.2s ease, border-color 0.2s ease;
-    }
-
-    .ghost-btn:hover {
-      background: #fff;
-      border-color: rgba(26, 29, 26, 0.22);
     }
 
     /* Auth */
@@ -512,20 +530,25 @@
       .stage {
         gap: 1.4rem;
       }
+
+      .topbar {
+        top: 0.75rem;
+        right: 0.75rem;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="topbar" id="topbar">
+    <p class="welcome hidden" id="welcome"><strong id="user-name"></strong>님</p>
+    <button type="button" class="ghost-btn" id="open-auth">로그인</button>
+    <button type="button" class="ghost-btn hidden" id="logout">로그아웃</button>
+  </div>
+
   <!-- 홈: 사진 + 한 줄 -->
   <main class="stage" id="app-view">
     <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
     <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
-
-    <div class="topbar">
-      <p class="welcome hidden" id="welcome"><strong id="user-name"></strong>님</p>
-      <button type="button" class="ghost-btn" id="open-auth">로그인</button>
-      <button type="button" class="ghost-btn hidden" id="logout">로그아웃</button>
-    </div>
 
     <p class="tagline">
       <em>평범하고 치열한 오늘도 언젠간 추억이 됩니다.</em>
@@ -631,6 +654,7 @@
     const welcomeEl = document.getElementById("welcome");
     const openAuthBtn = document.getElementById("open-auth");
     const logoutBtn = document.getElementById("logout");
+    const topbar = document.getElementById("topbar");
 
     const frame = document.getElementById("frame");
     const fileInput = document.getElementById("file");
@@ -781,6 +805,7 @@
     function showAuth() {
       appView.classList.add("hidden");
       authView.classList.remove("hidden");
+      topbar.classList.add("hidden");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -788,6 +813,7 @@
     function showHome(user) {
       authView.classList.add("hidden");
       appView.classList.remove("hidden");
+      topbar.classList.remove("hidden");
       updateTopbar(user || null);
       if (user) {
         loadPost(user.id);
