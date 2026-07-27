@@ -100,6 +100,18 @@
       border-color: rgba(26, 29, 26, 0.22);
     }
 
+    .ghost-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .ghost-btn.primary:hover {
+      filter: brightness(1.05);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
     .stage {
       width: min(100%, 420px);
       display: flex;
@@ -773,13 +785,44 @@
 <body>
   <div class="topbar" id="topbar">
     <p class="welcome hidden" id="welcome"><strong id="user-name"></strong>님</p>
-    <button type="button" class="ghost-btn hidden" id="open-archive">보관함</button>
+    <button type="button" class="ghost-btn primary hidden" id="open-write">기록하기</button>
     <button type="button" class="ghost-btn" id="open-auth">로그인</button>
     <button type="button" class="ghost-btn hidden" id="logout">로그아웃</button>
   </div>
 
-  <!-- 홈: 사진 + 한 줄 -->
-  <main class="stage" id="app-view">
+  <!-- 홈: 캘린더로 전체 기록 보기 -->
+  <main class="stage" id="archive-view">
+    <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
+    <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
+
+    <p class="streak archive-streak" id="archive-streak" aria-live="polite">로그인하면 기록이 캘린더에 모여요</p>
+
+    <section class="calendar" aria-label="기록 캘린더">
+      <div class="cal-head">
+        <button type="button" class="cal-nav" id="cal-prev" aria-label="이전 달">‹</button>
+        <h2 class="cal-title" id="cal-title">2026년 7월</h2>
+        <button type="button" class="cal-nav" id="cal-next" aria-label="다음 달">›</button>
+      </div>
+      <div class="cal-week" aria-hidden="true">
+        <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+      </div>
+      <div class="cal-days" id="cal-days"></div>
+      <div class="cal-legend" aria-hidden="true">
+        <span><i class="lg-done"></i>기록한 날</span>
+        <span><i class="lg-none"></i>기록 안 한 날</span>
+      </div>
+    </section>
+
+    <section class="archive-detail" id="archive-detail">
+      <p class="archive-date" id="archive-date"></p>
+      <img class="archive-photo hidden" id="archive-photo" alt="그날의 사진" />
+      <p class="archive-caption hidden" id="archive-caption"></p>
+      <p class="archive-empty" id="archive-empty">날짜를 선택하면 기록이 보여요</p>
+    </section>
+  </main>
+
+  <!-- 기록하기: 사진 + 한 줄 -->
+  <main class="stage hidden" id="app-view">
     <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
     <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
 
@@ -869,37 +912,6 @@
     </section>
   </main>
 
-  <!-- 보관함 -->
-  <main class="stage hidden" id="archive-view">
-    <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
-    <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
-
-    <p class="streak archive-streak" id="archive-streak" aria-live="polite"></p>
-
-    <section class="calendar" aria-label="기록 캘린더">
-      <div class="cal-head">
-        <button type="button" class="cal-nav" id="cal-prev" aria-label="이전 달">‹</button>
-        <h2 class="cal-title" id="cal-title">2026년 7월</h2>
-        <button type="button" class="cal-nav" id="cal-next" aria-label="다음 달">›</button>
-      </div>
-      <div class="cal-week" aria-hidden="true">
-        <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
-      </div>
-      <div class="cal-days" id="cal-days"></div>
-      <div class="cal-legend" aria-hidden="true">
-        <span><i class="lg-done"></i>기록한 날</span>
-        <span><i class="lg-none"></i>기록 안 한 날</span>
-      </div>
-    </section>
-
-    <section class="archive-detail" id="archive-detail">
-      <p class="archive-date" id="archive-date"></p>
-      <img class="archive-photo hidden" id="archive-photo" alt="그날의 사진" />
-      <p class="archive-caption hidden" id="archive-caption"></p>
-      <p class="archive-empty" id="archive-empty">날짜를 선택하면 기록이 보여요</p>
-    </section>
-  </main>
-
   <script>
     const USERS_KEY = "focusnow_users";
     const SESSION_KEY = "focusnow_session";
@@ -920,7 +932,7 @@
     const userNameEl = document.getElementById("user-name");
     const welcomeEl = document.getElementById("welcome");
     const openAuthBtn = document.getElementById("open-auth");
-    const openArchiveBtn = document.getElementById("open-archive");
+    const openWriteBtn = document.getElementById("open-write");
     const logoutBtn = document.getElementById("logout");
     const topbar = document.getElementById("topbar");
     const registerBtn = document.getElementById("register-btn");
@@ -1080,7 +1092,7 @@
       if (!user) {
         streakEl.classList.add("hidden");
         streakEl.textContent = "";
-        archiveStreakEl.textContent = "";
+        archiveStreakEl.textContent = "로그인하면 기록이 캘린더에 모여요";
         return;
       }
       const html = streakText(user);
@@ -1136,13 +1148,13 @@
       if (user) {
         userNameEl.textContent = user.name;
         welcomeEl.classList.remove("hidden");
-        openArchiveBtn.classList.remove("hidden");
+        openWriteBtn.classList.remove("hidden");
         openAuthBtn.classList.add("hidden");
         logoutBtn.classList.remove("hidden");
       } else {
         userNameEl.textContent = "";
         welcomeEl.classList.add("hidden");
-        openArchiveBtn.classList.add("hidden");
+        openWriteBtn.classList.add("hidden");
         openAuthBtn.classList.remove("hidden");
         logoutBtn.classList.add("hidden");
       }
@@ -1161,40 +1173,47 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    /** 홈 = 사진 올리고 한 줄 쓰는 공간 */
+    /** 홈 = 캘린더로 전체 기록 보기 */
     function showHome(user) {
       hideAllViews();
-      appView.classList.remove("hidden");
+      archiveView.classList.remove("hidden");
       topbar.classList.remove("hidden");
       updateTopbar(user || null);
+      updateStreakMessage(user || null);
+
+      const now = new Date();
+      calYear = now.getFullYear();
+      calMonth = now.getMonth();
+      selectedDate = todayKey();
+      renderCalendar(user ? user.id : null);
       if (user) {
-        loadTodayPost(user.id);
-        updateStreakMessage(user);
+        showArchiveDay(user.id, selectedDate);
       } else {
-        clearImageUi();
-        caption.value = "";
-        updateCharCount();
-        updateStreakMessage(null);
+        archiveDateEl.textContent = formatDisplayDate(selectedDate);
+        archivePhoto.classList.add("hidden");
+        archivePhoto.removeAttribute("src");
+        archiveCaption.classList.add("hidden");
+        archiveCaption.textContent = "";
+        archiveEmpty.classList.remove("hidden");
+        archiveEmpty.textContent = "로그인하면 날짜별 기록을 볼 수 있어요";
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function showArchive(user) {
+    /** 기록하기 = 사진 + 한 줄 */
+    function showWrite(user) {
       if (!user) {
         requireLogin();
         return;
       }
       hideAllViews();
-      archiveView.classList.remove("hidden");
+      appView.classList.remove("hidden");
       topbar.classList.remove("hidden");
       updateTopbar(user);
+      loadTodayPost(user.id);
       updateStreakMessage(user);
-      const now = new Date();
-      calYear = now.getFullYear();
-      calMonth = now.getMonth();
-      selectedDate = todayKey();
-      renderCalendar(user.id);
-      showArchiveDay(user.id, selectedDate);
+      registerMsg.textContent = "";
+      registerMsg.className = "register-msg";
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -1202,7 +1221,7 @@
       if (currentUser()) return true;
       showAuth();
       switchTab("login");
-      loginMsg.textContent = "홈을 이용하려면 로그인해주세요.";
+      loginMsg.textContent = "기록하려면 로그인해주세요.";
       loginMsg.className = "form-msg err";
       return false;
     }
@@ -1296,7 +1315,7 @@
     }
 
     function renderCalendar(userId) {
-      const archive = getArchive(userId);
+      const archive = userId ? getArchive(userId) : {};
       calTitle.textContent = calYear + "년 " + (calMonth + 1) + "월";
       calDays.innerHTML = "";
 
@@ -1321,14 +1340,14 @@
         btn.textContent = String(day);
         btn.dataset.date = dateKey;
 
-        if (archive[dateKey] && (archive[dateKey].image || (archive[dateKey].caption || "").trim())) {
+        if (userId && archive[dateKey] && (archive[dateKey].image || (archive[dateKey].caption || "").trim())) {
           btn.classList.add("has-entry");
           btn.title = "기록 있음";
           btn.setAttribute("aria-label", day + "일, 기록 있음");
         } else {
           btn.classList.add("no-entry");
-          btn.title = "기록 없음";
-          btn.setAttribute("aria-label", day + "일, 기록 없음");
+          btn.title = userId ? "기록 없음" : "로그인 후 확인";
+          btn.setAttribute("aria-label", day + "일");
         }
         if (dateKey === today) btn.classList.add("today");
         if (dateKey === selectedDate) btn.classList.add("selected");
@@ -1336,7 +1355,17 @@
         btn.addEventListener("click", () => {
           selectedDate = dateKey;
           renderCalendar(userId);
-          showArchiveDay(userId, dateKey);
+          if (userId) {
+            showArchiveDay(userId, dateKey);
+          } else {
+            archiveDateEl.textContent = formatDisplayDate(dateKey);
+            archivePhoto.classList.add("hidden");
+            archivePhoto.removeAttribute("src");
+            archiveCaption.classList.add("hidden");
+            archiveCaption.textContent = "";
+            archiveEmpty.classList.remove("hidden");
+            archiveEmpty.textContent = "로그인하면 날짜별 기록을 볼 수 있어요";
+          }
         });
         calDays.appendChild(btn);
       }
@@ -1484,30 +1513,28 @@
       switchTab("login");
     });
 
-    openArchiveBtn.addEventListener("click", () => {
-      showArchive(currentUser());
+    openWriteBtn.addEventListener("click", () => {
+      showWrite(currentUser());
     });
 
     calPrev.addEventListener("click", () => {
       const user = currentUser();
-      if (!user) return;
       calMonth -= 1;
       if (calMonth < 0) {
         calMonth = 11;
         calYear -= 1;
       }
-      renderCalendar(user.id);
+      renderCalendar(user ? user.id : null);
     });
 
     calNext.addEventListener("click", () => {
       const user = currentUser();
-      if (!user) return;
       calMonth += 1;
       if (calMonth > 11) {
         calMonth = 0;
         calYear += 1;
       }
-      renderCalendar(user.id);
+      renderCalendar(user ? user.id : null);
     });
 
     registerBtn.addEventListener("click", () => {
@@ -1539,6 +1566,7 @@
 
       registerMsg.textContent = "오늘의 기록이 등록되었습니다.";
       registerMsg.classList.add("ok");
+      setTimeout(() => showHome(currentUser()), 700);
     });
 
     logoutBtn.addEventListener("click", () => {
