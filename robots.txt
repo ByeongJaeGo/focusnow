@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://myfocusnow.vercel.app/sitemap.xml
+Sitemap: https://focusnow-iota.vercel.app/sitemap.xml
