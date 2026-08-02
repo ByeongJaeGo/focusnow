@@ -1727,24 +1727,29 @@
       const prev = growthFlowers.querySelectorAll(".growth-flower").length;
       const n = Math.max(0, Math.min(count, FLOWER_SPOTS.length));
       growthFlowers.innerHTML = "";
+      const svgNS = "http://www.w3.org/2000/svg";
       for (let i = 0; i < n; i++) {
         const spot = FLOWER_SPOTS[i];
-        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        g.setAttribute("class", "growth-flower" + (animateNew && i >= prev ? " is-new" : " is-on"));
+        const g = document.createElementNS(svgNS, "g");
+        g.setAttribute("class", "growth-flower" + (animateNew && i >= prev ? " is-new" : ""));
         g.setAttribute("transform", "translate(" + spot.x + " " + spot.y + ")");
         g.style.transitionDelay = (i * 0.06) + "s";
-        g.innerHTML =
-          '<circle r="13" fill="#d4a574"></circle>' +
-          '<circle r="6.5" fill="#f3e6c8"></circle>' +
-          '<circle cx="-8" cy="-2" r="5.5" fill="#c9955f" opacity="0.9"></circle>' +
-          '<circle cx="8" cy="-2" r="5.5" fill="#c9955f" opacity="0.9"></circle>' +
-          '<circle cx="0" cy="8" r="5.5" fill="#c9955f" opacity="0.85"></circle>';
+
+        const parts = [
+          { tag: "circle", attrs: { r: "13", fill: "#d4a574" } },
+          { tag: "circle", attrs: { r: "6.5", fill: "#f3e6c8" } },
+          { tag: "circle", attrs: { cx: "-8", cy: "-2", r: "5.5", fill: "#c9955f", opacity: "0.9" } },
+          { tag: "circle", attrs: { cx: "8", cy: "-2", r: "5.5", fill: "#c9955f", opacity: "0.9" } },
+          { tag: "circle", attrs: { cx: "0", cy: "8", r: "5.5", fill: "#c9955f", opacity: "0.85" } }
+        ];
+        parts.forEach((part) => {
+          const el = document.createElementNS(svgNS, part.tag);
+          Object.keys(part.attrs).forEach((k) => el.setAttribute(k, part.attrs[k]));
+          g.appendChild(el);
+        });
+
         growthFlowers.appendChild(g);
-        if (animateNew && i >= prev) {
-          requestAnimationFrame(() => g.classList.add("is-on"));
-        } else {
-          g.classList.add("is-on");
-        }
+        requestAnimationFrame(() => g.classList.add("is-on"));
       }
     }
 
