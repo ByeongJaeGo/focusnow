@@ -167,6 +167,105 @@
       animation: fade-in 1s ease 0.25s both;
     }
 
+    .title-badge {
+      width: 100%;
+      margin-top: -0.85rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 0.85rem 1rem;
+      background: linear-gradient(
+        135deg,
+        rgba(47, 107, 79, 0.12),
+        rgba(255, 255, 255, 0.55) 45%,
+        rgba(47, 107, 79, 0.08)
+      );
+      border: 1px solid rgba(47, 107, 79, 0.28);
+      animation: title-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .title-badge.hidden {
+      display: none !important;
+    }
+
+    .title-badge-name {
+      font-family: "Syne", sans-serif;
+      font-size: clamp(1.35rem, 5vw, 1.65rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--accent);
+      animation: title-glow 2.4s ease-in-out infinite;
+    }
+
+    .title-badge-lv {
+      font-family: "Syne", sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      opacity: 0.78;
+      animation: title-lv-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+    }
+
+    .title-badge.pop {
+      animation: none;
+    }
+
+    .title-badge.pop .title-badge-name,
+    .title-badge.pop .title-badge-lv {
+      animation: title-pop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes title-in {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes title-glow {
+      0%, 100% {
+        text-shadow: 0 0 0 transparent;
+        transform: translateY(0);
+      }
+      50% {
+        text-shadow: 0 0 18px rgba(47, 107, 79, 0.35);
+        transform: translateY(-1px);
+      }
+    }
+
+    @keyframes title-lv-pop {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 0.78;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes title-pop {
+      0% {
+        opacity: 0;
+        transform: scale(0.82);
+      }
+      60% {
+        opacity: 1;
+        transform: scale(1.06);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
     .tagline {
       width: 100%;
       text-align: center;
@@ -559,21 +658,6 @@
       font-weight: 600;
     }
 
-    .streak-title {
-      display: block;
-      margin-bottom: 0.25rem;
-      font-family: "Syne", sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--accent);
-    }
-
-    .streak-title .lv {
-      font-weight: 600;
-      opacity: 0.85;
-    }
-
     .archive-streak {
       margin-top: 0;
       padding: 0.85rem 0.9rem;
@@ -901,6 +985,10 @@
     <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
     <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
     <p class="brand-line">하루 단 1장의 사진이나 이미지, 단 1줄로 오늘 기록.</p>
+    <div class="title-badge hidden" id="archive-title-badge" aria-live="polite">
+      <span class="title-badge-name" id="archive-title-name"></span>
+      <span class="title-badge-lv" id="archive-title-lv"></span>
+    </div>
 
     <p class="streak archive-streak" id="archive-streak" aria-live="polite">로그인하면 기록이 캘린더에 모여요</p>
 
@@ -933,6 +1021,10 @@
     <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
     <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
     <p class="brand-line">하루 단 1장의 사진이나 이미지, 단 1줄로 오늘 기록.</p>
+    <div class="title-badge hidden" id="write-title-badge" aria-live="polite">
+      <span class="title-badge-name" id="write-title-name"></span>
+      <span class="title-badge-lv" id="write-title-lv"></span>
+    </div>
 
     <p class="tagline">
       <em>평범하고 치열한 오늘도 언젠간 추억이 됩니다.</em>
@@ -1073,6 +1165,12 @@
     const charCount = document.getElementById("char-count");
     const streakEl = document.getElementById("streak");
     const archiveStreakEl = document.getElementById("archive-streak");
+    const archiveTitleBadge = document.getElementById("archive-title-badge");
+    const archiveTitleName = document.getElementById("archive-title-name");
+    const archiveTitleLv = document.getElementById("archive-title-lv");
+    const writeTitleBadge = document.getElementById("write-title-badge");
+    const writeTitleName = document.getElementById("write-title-name");
+    const writeTitleLv = document.getElementById("write-title-lv");
     const confirmOverlay = document.getElementById("confirm-overlay");
     const confirmDateEl = document.getElementById("confirm-date");
     const confirmYesBtn = document.getElementById("confirm-yes");
@@ -1235,15 +1333,34 @@
 
     function streakText(user) {
       const days = getDisplayStreak(user.id);
-      const rank = getTitleRank(days);
-      if (!rank) {
-        return user.name + "님, 오늘 한 장·한 줄로 시작해보세요.";
+      if (days < 1) {
+        return "현재 <strong>" + user.name + "</strong>님, 오늘 기록을 시작해보세요!";
       }
       return (
-        '<span class="streak-title">' + rank.title +
-        ' <span class="lv">Lv.' + rank.level + "</span></span>" +
-        user.name + "님은 현재 <strong>" + days + "일</strong> 연속으로 소중한 하루를 기록 중입니다."
+        "현재 <strong>" + user.name + "</strong>님은 <strong>" + days +
+        "일</strong> 연속 기록중이네요! 대단합니다"
       );
+    }
+
+    function renderTitleBadge(badgeEl, nameEl, lvEl, rank, animate) {
+      if (!badgeEl || !nameEl || !lvEl) return;
+      if (!rank) {
+        badgeEl.classList.add("hidden");
+        badgeEl.classList.remove("pop");
+        nameEl.textContent = "";
+        lvEl.textContent = "";
+        return;
+      }
+      nameEl.textContent = rank.title;
+      lvEl.textContent = "Lv." + rank.level;
+      badgeEl.classList.remove("hidden");
+      if (animate) {
+        badgeEl.classList.remove("pop");
+        void badgeEl.offsetWidth;
+        badgeEl.classList.add("pop");
+        const clearPop = () => badgeEl.classList.remove("pop");
+        badgeEl.addEventListener("animationend", clearPop, { once: true });
+      }
     }
 
     function updateStreakMessage(user) {
@@ -1251,12 +1368,18 @@
         streakEl.classList.add("hidden");
         streakEl.textContent = "";
         archiveStreakEl.textContent = "로그인하면 기록이 캘린더에 모여요";
+        renderTitleBadge(archiveTitleBadge, archiveTitleName, archiveTitleLv, null);
+        renderTitleBadge(writeTitleBadge, writeTitleName, writeTitleLv, null);
         return;
       }
+      const days = getDisplayStreak(user.id);
+      const rank = getTitleRank(days);
       const html = streakText(user);
       streakEl.innerHTML = html;
       streakEl.classList.remove("hidden");
       archiveStreakEl.innerHTML = html;
+      renderTitleBadge(archiveTitleBadge, archiveTitleName, archiveTitleLv, rank, true);
+      renderTitleBadge(writeTitleBadge, writeTitleName, writeTitleLv, rank, true);
     }
 
     function getUsers() {
