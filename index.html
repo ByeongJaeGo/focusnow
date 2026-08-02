@@ -956,6 +956,63 @@
       border-color: var(--accent);
     }
 
+    .celebrate-dialog {
+      width: min(100%, 320px);
+      padding: 1.65rem 1.35rem 1.3rem;
+    }
+
+    .celebrate-eyebrow {
+      font-size: 0.78rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.06em;
+      color: var(--accent) !important;
+      margin-bottom: 0.35rem !important;
+    }
+
+    .celebrate-dialog #celebrate-heading {
+      font-family: "Syne", sans-serif;
+      font-size: 1.2rem !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.03em;
+      line-height: 1.35 !important;
+    }
+
+    .celebrate-rank {
+      margin-top: 0.85rem !important;
+      font-family: "Syne", sans-serif;
+      font-size: 1.45rem !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.03em;
+      color: var(--accent) !important;
+      animation: title-pop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .celebrate-sub {
+      margin-top: 0.35rem !important;
+      font-size: 0.86rem !important;
+      font-weight: 400 !important;
+      color: var(--muted) !important;
+    }
+
+    .celebrate-dialog .celebrate-ok {
+      width: 100%;
+      margin-top: 1.25rem;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.75rem 0.5rem;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: filter 0.2s ease;
+    }
+
+    .celebrate-dialog .celebrate-ok:hover {
+      filter: brightness(1.05);
+    }
+
     /* 오른쪽 성장 식물 */
     .growth-panel {
       position: fixed;
@@ -1336,6 +1393,23 @@
     </div>
   </div>
 
+  <div class="confirm-overlay hidden" id="celebrate-overlay" role="presentation">
+    <div
+      class="confirm-dialog celebrate-dialog"
+      id="celebrate-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="celebrate-heading"
+      aria-describedby="celebrate-rank"
+    >
+      <p class="celebrate-eyebrow">축하해요</p>
+      <p id="celebrate-heading">레벨이 올랐어요!</p>
+      <p class="celebrate-rank" id="celebrate-rank"></p>
+      <p class="celebrate-sub" id="celebrate-sub"></p>
+      <button type="button" class="celebrate-ok" id="celebrate-ok">확인</button>
+    </div>
+  </div>
+
   <script>
     const USERS_KEY = "focusnow_users";
     const SESSION_KEY = "focusnow_session";
@@ -1383,6 +1457,11 @@
     const confirmDateEl = document.getElementById("confirm-date");
     const confirmYesBtn = document.getElementById("confirm-yes");
     const confirmNoBtn = document.getElementById("confirm-no");
+    const celebrateOverlay = document.getElementById("celebrate-overlay");
+    const celebrateHeading = document.getElementById("celebrate-heading");
+    const celebrateRankEl = document.getElementById("celebrate-rank");
+    const celebrateSubEl = document.getElementById("celebrate-sub");
+    const celebrateOkBtn = document.getElementById("celebrate-ok");
     const calTitle = document.getElementById("cal-title");
     const calDays = document.getElementById("cal-days");
     const calPrev = document.getElementById("cal-prev");
@@ -1537,6 +1616,37 @@
       }
       const level = Math.min(days, 30) - 14;
       return { title: "꾸준함의 대명사", level: level, days: days };
+    }
+
+    function rankSignature(rank) {
+      if (!rank) return "";
+      return rank.title + "|" + rank.level;
+    }
+
+    function openCelebrate(info) {
+      if (!info || !info.nextRank || !celebrateOverlay) return;
+      const next = info.nextRank;
+      const prev = info.prevRank;
+      const titleChanged = !prev || prev.title !== next.title;
+      const isFirst = !prev;
+
+      if (isFirst) {
+        celebrateHeading.textContent = "첫 칭호를 얻었어요!";
+      } else if (titleChanged) {
+        celebrateHeading.textContent = "칭호가 올랐어요!";
+      } else {
+        celebrateHeading.textContent = "레벨이 올랐어요!";
+      }
+
+      celebrateRankEl.textContent = next.title + " · Lv." + next.level;
+      celebrateSubEl.textContent = info.days + "일 연속 기록 달성";
+      celebrateOverlay.classList.remove("hidden");
+      celebrateOkBtn.focus();
+    }
+
+    function closeCelebrate() {
+      if (!celebrateOverlay) return;
+      celebrateOverlay.classList.add("hidden");
     }
 
     function streakText(user) {
@@ -1827,7 +1937,7 @@
     function savePost(options) {
       const touch = !options || options.touchStreak !== false;
       const session = getSession();
-      if (!session) return false;
+      if (!session) return { ok: false, celebration: null };
       const data = {
         image: preview.getAttribute("src") || "",
         caption: caption.value
@@ -1838,16 +1948,27 @@
         try {
           setDayEntry(session.id, todayKey(), { image: "", caption: data.caption });
         } catch (__) {
-          return false;
+          return { ok: false, celebration: null };
         }
       }
 
+      let celebration = null;
       if (touch && data.image && data.caption.trim()) {
-        touchStreak(session.id);
+        const prevDays = getDisplayStreak(session.id);
+        const prevRank = getTitleRank(prevDays);
+        const nextDays = touchStreak(session.id);
+        const nextRank = getTitleRank(nextDays);
+        if (nextRank && rankSignature(prevRank) !== rankSignature(nextRank)) {
+          celebration = {
+            prevRank: prevRank,
+            nextRank: nextRank,
+            days: nextDays
+          };
+        }
         const user = currentUser();
         if (user) updateStreakMessage(user);
       }
-      return true;
+      return { ok: true, celebration: celebration };
     }
 
     function loadTodayPost(userId) {
@@ -2088,8 +2209,21 @@
       if (e.target === confirmOverlay) closeRecordConfirm();
     });
 
+    celebrateOkBtn.addEventListener("click", () => {
+      closeCelebrate();
+    });
+
+    celebrateOverlay.addEventListener("click", (e) => {
+      if (e.target === celebrateOverlay) closeCelebrate();
+    });
+
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !confirmOverlay.classList.contains("hidden")) {
+      if (e.key !== "Escape") return;
+      if (!celebrateOverlay.classList.contains("hidden")) {
+        closeCelebrate();
+        return;
+      }
+      if (!confirmOverlay.classList.contains("hidden")) {
         closeRecordConfirm();
       }
     });
@@ -2134,8 +2268,8 @@
         return;
       }
 
-      const ok = savePost({ touchStreak: true });
-      if (!ok) {
+      const result = savePost({ touchStreak: true });
+      if (!result.ok) {
         registerMsg.textContent = "저장에 실패했습니다. 다시 시도해주세요.";
         registerMsg.classList.add("err");
         return;
@@ -2143,7 +2277,10 @@
 
       registerMsg.textContent = "오늘의 기록이 등록되었습니다.";
       registerMsg.classList.add("ok");
-      setTimeout(() => showHome(currentUser()), 700);
+      showHome(currentUser());
+      if (result.celebration) {
+        openCelebrate(result.celebration);
+      }
     });
 
     logoutBtn.addEventListener("click", () => {
