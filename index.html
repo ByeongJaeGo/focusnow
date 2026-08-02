@@ -122,7 +122,116 @@
     }
 
     #archive-view.stage {
+      width: min(100%, 900px);
+    }
+
+    .archive-board {
+      width: 100%;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 1.1rem;
+    }
+
+    .archive-center {
       width: min(100%, 620px);
+      flex: 1 1 620px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.75rem;
+      min-width: 0;
+    }
+
+    .growth-guide {
+      width: 168px;
+      flex: 0 0 168px;
+      margin-top: 0.2rem;
+      padding: 0.85rem 0.75rem 0.9rem;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid var(--line);
+      animation: fade-in 1s ease 0.3s both;
+    }
+
+    .growth-guide-title {
+      font-family: "Syne", sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 0.2rem;
+    }
+
+    .growth-guide-sub {
+      font-size: 0.68rem;
+      line-height: 1.4;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .growth-guide-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .growth-guide-item {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 0.45rem;
+      align-items: start;
+      padding: 0.45rem 0.4rem;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .growth-guide-item.is-current {
+      background: rgba(47, 107, 79, 0.1);
+      border-color: rgba(47, 107, 79, 0.28);
+    }
+
+    .growth-guide-item.is-done .guide-name {
+      color: var(--accent);
+    }
+
+    .guide-icon {
+      width: 28px;
+      height: 28px;
+      display: block;
+    }
+
+    .guide-text {
+      min-width: 0;
+    }
+
+    .guide-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .guide-range {
+      margin-top: 0.12rem;
+      font-size: 0.66rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .growth-guide-note {
+      margin-top: 0.7rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.66rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .growth-guide-note strong {
+      color: var(--accent);
+      font-weight: 600;
     }
 
     .brand {
@@ -1302,6 +1411,16 @@
       100% { opacity: 0; transform: scale(1.35); }
     }
 
+    @media (max-width: 860px) {
+      .growth-guide {
+        display: none;
+      }
+
+      #archive-view.stage {
+        width: min(100%, 620px);
+      }
+    }
+
     @media (max-width: 640px) {
       .growth-panel {
         display: none;
@@ -1309,6 +1428,10 @@
 
       .calendar-row {
         display: block;
+      }
+
+      #archive-view.stage {
+        width: min(100%, 420px);
       }
     }
 
@@ -1338,73 +1461,137 @@
 
   <!-- 홈: 캘린더로 전체 기록 보기 -->
   <main class="stage" id="archive-view">
-    <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
-    <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
-    <p class="brand-line">하루 단 1장의 사진이나 이미지, 단 1줄로 오늘 기록.</p>
-    <div class="title-badge hidden" id="archive-title-badge" aria-live="polite">
-      <span class="title-badge-name" id="archive-title-name"></span>
-      <span class="title-badge-lv" id="archive-title-lv"></span>
-    </div>
-
-    <p class="streak archive-streak" id="archive-streak" aria-live="polite">로그인하면 기록이 캘린더에 모여요</p>
-
-    <div class="calendar-row">
-      <section class="calendar" aria-label="기록 캘린더">
-        <div class="cal-head">
-          <button type="button" class="cal-nav" id="cal-prev" aria-label="이전 달">‹</button>
-          <h2 class="cal-title" id="cal-title">2026년 7월</h2>
-          <button type="button" class="cal-nav" id="cal-next" aria-label="다음 달">›</button>
-        </div>
-        <div class="cal-week" aria-hidden="true">
-          <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
-        </div>
-        <div class="cal-days" id="cal-days"></div>
-        <div class="cal-legend" aria-hidden="true">
-          <span><i class="lg-done"></i>기록한 날</span>
-          <span><i class="lg-none"></i>기록 안 한 날</span>
-        </div>
-      </section>
-
-      <aside class="growth-panel" id="growth-panel" aria-label="기록으로 자라는 식물">
-        <div class="growth-scene" id="growth-scene" data-stage="idle">
-          <div class="growth-fx" id="growth-fx" aria-hidden="true">
-            <span></span><span></span><span></span><span></span><span></span><span></span>
-          </div>
-          <svg class="growth-svg" viewBox="0 0 200 320" role="img" aria-hidden="true">
-            <ellipse class="growth-soil" cx="100" cy="292" rx="78" ry="18" />
-            <ellipse class="growth-soil-top" cx="100" cy="286" rx="62" ry="10" opacity="0.55" />
-            <circle class="growth-aura" cx="100" cy="268" r="28" />
-
-            <g class="growth-sway">
-              <g class="growth-stem-group">
-                <path class="growth-stem" d="M100 255 C96 210, 104 160, 100 110 C98 85, 102 70, 100 55" />
-                <ellipse class="growth-leaf delay-1" cx="72" cy="200" rx="28" ry="12" transform="rotate(-28 72 200)" />
-                <ellipse class="growth-leaf r delay-2" cx="128" cy="175" rx="30" ry="12" transform="rotate(30 128 175)" />
-                <ellipse class="growth-leaf delay-3" cx="68" cy="140" rx="26" ry="11" transform="rotate(-34 68 140)" />
-                <ellipse class="growth-leaf r delay-4" cx="132" cy="115" rx="28" ry="11" transform="rotate(32 132 115)" />
-                <g id="growth-flowers"></g>
-              </g>
-            </g>
-
-            <ellipse class="growth-tip" cx="100" cy="252" rx="5" ry="14" />
-
-            <g class="growth-seed">
-              <ellipse class="growth-seed-left" cx="94" cy="268" rx="11" ry="8" />
-              <ellipse class="growth-seed-right" cx="106" cy="268" rx="11" ry="8" />
-            </g>
-          </svg>
-          <p class="growth-caption" id="growth-caption">씨앗을 기다리는 중</p>
-          <p class="growth-days" id="growth-days"></p>
-        </div>
+    <div class="archive-board">
+      <aside class="growth-guide" id="growth-guide" aria-label="성장 단계 안내">
+        <p class="growth-guide-title">성장 단계</p>
+        <p class="growth-guide-sub">연속 기록하며 씨앗이 꽃으로 바뀝니다.</p>
+        <ul class="growth-guide-list">
+          <li class="growth-guide-item" data-guide-stage="seed">
+            <svg class="guide-icon" viewBox="0 0 28 28" aria-hidden="true">
+              <ellipse cx="14" cy="22" rx="9" ry="3" fill="#8a7355" />
+              <ellipse cx="14" cy="18" rx="5" ry="3.5" fill="#c4a574" />
+              <ellipse cx="14" cy="14" rx="1.6" ry="3" fill="#4a8f66" />
+            </svg>
+            <div class="guide-text">
+              <p class="guide-name">씨앗</p>
+              <p class="guide-range">1~7일 · Lv.1~7<br />씨앗이 품어지고 새순이 돋아요</p>
+            </div>
+          </li>
+          <li class="growth-guide-item" data-guide-stage="sprout">
+            <svg class="guide-icon" viewBox="0 0 28 28" aria-hidden="true">
+              <ellipse cx="14" cy="24" rx="8" ry="2.5" fill="#8a7355" />
+              <path d="M14 22 V10" stroke="#2f6b4f" stroke-width="1.6" stroke-linecap="round" />
+              <ellipse cx="9" cy="15" rx="4" ry="1.6" fill="#3d8a5f" transform="rotate(-25 9 15)" />
+              <ellipse cx="19" cy="13" rx="4" ry="1.6" fill="#3d8a5f" transform="rotate(25 19 13)" />
+            </svg>
+            <div class="guide-text">
+              <p class="guide-name">새싹</p>
+              <p class="guide-range">8~14일 · Lv.1~7<br />짧은 줄기와 잎이 자라요</p>
+            </div>
+          </li>
+          <li class="growth-guide-item" data-guide-stage="stem">
+            <svg class="guide-icon" viewBox="0 0 28 28" aria-hidden="true">
+              <ellipse cx="14" cy="24" rx="8" ry="2.5" fill="#8a7355" />
+              <path d="M14 22 V6" stroke="#2f6b4f" stroke-width="1.6" stroke-linecap="round" />
+              <ellipse cx="8" cy="16" rx="4.2" ry="1.6" fill="#3d8a5f" transform="rotate(-28 8 16)" />
+              <ellipse cx="20" cy="12" rx="4.2" ry="1.6" fill="#3d8a5f" transform="rotate(28 20 12)" />
+            </svg>
+            <div class="guide-text">
+              <p class="guide-name">줄기</p>
+              <p class="guide-range">15~21일 · Lv.1~7<br />줄기가 길게 뻗어 올라가요</p>
+            </div>
+          </li>
+          <li class="growth-guide-item" data-guide-stage="flower">
+            <svg class="guide-icon" viewBox="0 0 28 28" aria-hidden="true">
+              <ellipse cx="14" cy="24" rx="8" ry="2.5" fill="#8a7355" />
+              <path d="M14 22 V12" stroke="#2f6b4f" stroke-width="1.6" stroke-linecap="round" />
+              <ellipse cx="14" cy="7" rx="2.2" ry="4" fill="#ff4d6d" transform="rotate(0 14 7)" />
+              <ellipse cx="14" cy="7" rx="2.2" ry="4" fill="#ff9f1c" transform="rotate(60 14 7)" />
+              <ellipse cx="14" cy="7" rx="2.2" ry="4" fill="#ffd60a" transform="rotate(120 14 7)" />
+              <ellipse cx="14" cy="7" rx="2.2" ry="4" fill="#80ed99" transform="rotate(180 14 7)" />
+              <ellipse cx="14" cy="7" rx="2.2" ry="4" fill="#4cc9f0" transform="rotate(240 14 7)" />
+              <ellipse cx="14" cy="7" rx="2.2" ry="4" fill="#c77dff" transform="rotate(300 14 7)" />
+              <circle cx="14" cy="7" r="1.6" fill="#ffe66d" />
+            </svg>
+            <div class="guide-text">
+              <p class="guide-name">꽃</p>
+              <p class="guide-range">22일~ · 레벨 무한<br />7레벨마다 무지개 꽃 +1</p>
+            </div>
+          </li>
+        </ul>
+        <p class="growth-guide-note" id="growth-guide-note">로그인 후 기록을 시작하면 단계가 열려요.</p>
       </aside>
-    </div>
 
-    <section class="archive-detail" id="archive-detail">
-      <p class="archive-date" id="archive-date"></p>
-      <img class="archive-photo hidden" id="archive-photo" alt="그날의 사진" />
-      <p class="archive-caption hidden" id="archive-caption"></p>
-      <p class="archive-empty" id="archive-empty">날짜를 선택하면 기록이 보여요</p>
-    </section>
+      <div class="archive-center">
+        <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
+        <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
+        <p class="brand-line">하루 단 1장의 사진이나 이미지, 단 1줄로 오늘 기록.</p>
+        <div class="title-badge hidden" id="archive-title-badge" aria-live="polite">
+          <span class="title-badge-name" id="archive-title-name"></span>
+          <span class="title-badge-lv" id="archive-title-lv"></span>
+        </div>
+
+        <p class="streak archive-streak" id="archive-streak" aria-live="polite">로그인하면 기록이 캘린더에 모여요</p>
+
+        <div class="calendar-row">
+          <section class="calendar" aria-label="기록 캘린더">
+            <div class="cal-head">
+              <button type="button" class="cal-nav" id="cal-prev" aria-label="이전 달">‹</button>
+              <h2 class="cal-title" id="cal-title">2026년 7월</h2>
+              <button type="button" class="cal-nav" id="cal-next" aria-label="다음 달">›</button>
+            </div>
+            <div class="cal-week" aria-hidden="true">
+              <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+            </div>
+            <div class="cal-days" id="cal-days"></div>
+            <div class="cal-legend" aria-hidden="true">
+              <span><i class="lg-done"></i>기록한 날</span>
+              <span><i class="lg-none"></i>기록 안 한 날</span>
+            </div>
+          </section>
+
+          <aside class="growth-panel" id="growth-panel" aria-label="기록으로 자라는 식물">
+            <div class="growth-scene" id="growth-scene" data-stage="idle">
+              <div class="growth-fx" id="growth-fx" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <svg class="growth-svg" viewBox="0 0 200 320" role="img" aria-hidden="true">
+                <ellipse class="growth-soil" cx="100" cy="292" rx="78" ry="18" />
+                <ellipse class="growth-soil-top" cx="100" cy="286" rx="62" ry="10" opacity="0.55" />
+                <circle class="growth-aura" cx="100" cy="268" r="28" />
+
+                <g class="growth-sway">
+                  <g class="growth-stem-group">
+                    <path class="growth-stem" d="M100 255 C96 210, 104 160, 100 110 C98 85, 102 70, 100 55" />
+                    <ellipse class="growth-leaf delay-1" cx="72" cy="200" rx="28" ry="12" transform="rotate(-28 72 200)" />
+                    <ellipse class="growth-leaf r delay-2" cx="128" cy="175" rx="30" ry="12" transform="rotate(30 128 175)" />
+                    <ellipse class="growth-leaf delay-3" cx="68" cy="140" rx="26" ry="11" transform="rotate(-34 68 140)" />
+                    <ellipse class="growth-leaf r delay-4" cx="132" cy="115" rx="28" ry="11" transform="rotate(32 132 115)" />
+                    <g id="growth-flowers"></g>
+                  </g>
+                </g>
+
+                <ellipse class="growth-tip" cx="100" cy="252" rx="5" ry="14" />
+
+                <g class="growth-seed">
+                  <ellipse class="growth-seed-left" cx="94" cy="268" rx="11" ry="8" />
+                  <ellipse class="growth-seed-right" cx="106" cy="268" rx="11" ry="8" />
+                </g>
+              </svg>
+              <p class="growth-caption" id="growth-caption">씨앗을 기다리는 중</p>
+              <p class="growth-days" id="growth-days"></p>
+            </div>
+          </aside>
+        </div>
+
+        <section class="archive-detail" id="archive-detail">
+          <p class="archive-date" id="archive-date"></p>
+          <img class="archive-photo hidden" id="archive-photo" alt="그날의 사진" />
+          <p class="archive-caption hidden" id="archive-caption"></p>
+          <p class="archive-empty" id="archive-empty">날짜를 선택하면 기록이 보여요</p>
+        </section>
+      </div>
+    </div>
   </main>
 
   <!-- 기록하기: 사진 + 한 줄 -->
@@ -1584,6 +1771,8 @@
     const growthDays = document.getElementById("growth-days");
     const growthFlowers = document.getElementById("growth-flowers");
     const growthFx = document.getElementById("growth-fx");
+    const growthGuideNote = document.getElementById("growth-guide-note");
+    const growthGuideItems = document.querySelectorAll("[data-guide-stage]");
     let lastGrowthKey = "";
     const confirmOverlay = document.getElementById("confirm-overlay");
     const confirmDateEl = document.getElementById("confirm-date");
@@ -1967,6 +2156,37 @@
       lastGrowthKey = key;
     }
 
+    function updateGrowthGuide(rank) {
+      if (!growthGuideItems || !growthGuideItems.length) return;
+      const order = ["seed", "sprout", "stem", "flower"];
+      const current = rank && rank.stage ? rank.stage : "";
+      const currentIdx = order.indexOf(current);
+
+      growthGuideItems.forEach((item) => {
+        const stage = item.getAttribute("data-guide-stage");
+        const idx = order.indexOf(stage);
+        item.classList.toggle("is-current", stage === current);
+        item.classList.toggle("is-done", currentIdx > idx);
+      });
+
+      if (!growthGuideNote) return;
+      if (!rank) {
+        growthGuideNote.innerHTML = "로그인 후 기록을 시작하면 단계가 열려요.";
+        return;
+      }
+      if (rank.stage === "seed") {
+        growthGuideNote.innerHTML = "지금 <strong>씨앗 Lv." + rank.level + "</strong> · 7일까지 새순이 커져요.";
+      } else if (rank.stage === "sprout") {
+        growthGuideNote.innerHTML = "지금 <strong>새싹 Lv." + rank.level + "</strong> · 14일까지 잎이 자라요.";
+      } else if (rank.stage === "stem") {
+        growthGuideNote.innerHTML = "지금 <strong>줄기 Lv." + rank.level + "</strong> · 21일까지 줄기가 뻗어요.";
+      } else if (rank.stage === "flower") {
+        growthGuideNote.innerHTML =
+          "지금 <strong>꽃 Lv." + rank.level + "</strong> · 꽃 <strong>" +
+          rank.flowers + "</strong>송이 · 7레벨마다 +1";
+      }
+    }
+
     function updateStreakMessage(user) {
       if (!user) {
         streakEl.classList.add("hidden");
@@ -1975,6 +2195,7 @@
         renderTitleBadge(archiveTitleBadge, archiveTitleName, archiveTitleLv, null);
         renderTitleBadge(writeTitleBadge, writeTitleName, writeTitleLv, null);
         updateGrowthPlant(0, null);
+        updateGrowthGuide(null);
         return;
       }
       const days = getDisplayStreak(user.id);
@@ -1986,6 +2207,7 @@
       renderTitleBadge(archiveTitleBadge, archiveTitleName, archiveTitleLv, rank, true);
       renderTitleBadge(writeTitleBadge, writeTitleName, writeTitleLv, rank, true);
       updateGrowthPlant(days, rank);
+      updateGrowthGuide(rank);
     }
 
     function getUsers() {
