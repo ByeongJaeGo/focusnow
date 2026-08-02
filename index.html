@@ -1171,15 +1171,11 @@
 
     .growth-flower {
       opacity: 0;
-      transform-box: fill-box;
-      transform-origin: center;
-      transform: scale(0);
-      transition: opacity 0.55s ease, transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: opacity 0.55s ease;
     }
 
     .growth-flower.is-on {
       opacity: 1;
-      transform: scale(1);
       animation: flower-bob 2.8s ease-in-out infinite;
     }
 
@@ -1245,8 +1241,8 @@
     }
 
     @keyframes flower-bob {
-      0%, 100% { transform: scale(1) translateY(0); }
-      50% { transform: scale(1) translateY(-2px); }
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
     }
 
     @keyframes flower-pop {
@@ -1307,8 +1303,8 @@
           <ellipse class="growth-leaf r delay-2" cx="128" cy="175" rx="30" ry="12" transform="rotate(30 128 175)" />
           <ellipse class="growth-leaf delay-3" cx="68" cy="140" rx="26" ry="11" transform="rotate(-34 68 140)" />
           <ellipse class="growth-leaf r delay-4" cx="132" cy="115" rx="28" ry="11" transform="rotate(32 132 115)" />
-          <g id="growth-flowers"></g>
         </g>
+        <g id="growth-flowers"></g>
 
         <ellipse class="growth-tip" cx="100" cy="252" rx="5" ry="14" />
 
