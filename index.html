@@ -1094,6 +1094,33 @@
       animation: seed-breathe 2.8s ease-in-out infinite;
     }
 
+    .growth-stem-group {
+      transform-origin: 100px 255px;
+      transform: scaleY(var(--stem));
+      transition: transform 1.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
+    }
+
+    .growth-scene[data-stage="idle"] .growth-stem-group,
+    .growth-scene[data-stage="seed"] .growth-stem-group {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .growth-scene[data-stage="sprout"] .growth-stem-group,
+    .growth-scene[data-stage="stem"] .growth-stem-group,
+    .growth-scene[data-stage="flower"] .growth-stem-group {
+      opacity: 1;
+      visibility: visible;
+      animation: stem-sway 3.6s ease-in-out infinite;
+    }
+
+    .growth-scene[data-stage="sprout"] #growth-flowers,
+    .growth-scene[data-stage="stem"] #growth-flowers {
+      opacity: 0;
+      visibility: hidden;
+    }
+
     .growth-tip {
       fill: #4a8f66;
       transform-origin: 100px 260px;
@@ -1102,16 +1129,12 @@
       opacity: calc(var(--tip) * 0.95);
     }
 
-    .growth-stem-group {
-      transform-origin: 100px 255px;
-      transform: scaleY(var(--stem));
-      transition: transform 1.35s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .growth-scene[data-stage="sprout"] .growth-stem-group,
-    .growth-scene[data-stage="stem"] .growth-stem-group,
-    .growth-scene[data-stage="flower"] .growth-stem-group {
-      animation: stem-sway 3.6s ease-in-out infinite;
+    .growth-scene[data-stage="idle"] .growth-tip,
+    .growth-scene[data-stage="sprout"] .growth-tip,
+    .growth-scene[data-stage="stem"] .growth-tip,
+    .growth-scene[data-stage="flower"] .growth-tip {
+      opacity: 0;
+      visibility: hidden;
     }
 
     .growth-stem {
