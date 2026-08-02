@@ -121,6 +121,10 @@
       animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
+    #archive-view.stage {
+      width: min(100%, 620px);
+    }
+
     .brand {
       font-family: "Syne", sans-serif;
       font-weight: 700;
@@ -1013,14 +1017,26 @@
       filter: brightness(1.05);
     }
 
-    /* 오른쪽 성장 식물 */
+    /* 캘린더 옆 성장 식물 (스크롤에 고정되지 않음) */
+    .calendar-row {
+      width: 100%;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .calendar-row .calendar {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
     .growth-panel {
-      position: fixed;
-      right: max(1.25rem, calc((100vw - 420px) / 2 - 220px));
-      top: 50%;
-      transform: translateY(-46%);
+      position: relative;
       z-index: 5;
-      width: min(200px, 22vw);
+      width: 160px;
+      flex: 0 0 160px;
+      margin-top: 0.35rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1286,9 +1302,13 @@
       100% { opacity: 0; transform: scale(1.35); }
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 640px) {
       .growth-panel {
         display: none;
+      }
+
+      .calendar-row {
+        display: block;
       }
     }
 
@@ -1316,39 +1336,6 @@
     <button type="button" class="ghost-btn hidden" id="logout">로그아웃</button>
   </div>
 
-  <aside class="growth-panel" id="growth-panel" aria-label="기록으로 자라는 식물">
-    <div class="growth-scene" id="growth-scene" data-stage="idle">
-      <div class="growth-fx" id="growth-fx" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <svg class="growth-svg" viewBox="0 0 200 320" role="img" aria-hidden="true">
-        <ellipse class="growth-soil" cx="100" cy="292" rx="78" ry="18" />
-        <ellipse class="growth-soil-top" cx="100" cy="286" rx="62" ry="10" opacity="0.55" />
-        <circle class="growth-aura" cx="100" cy="268" r="28" />
-
-        <g class="growth-sway">
-          <g class="growth-stem-group">
-            <path class="growth-stem" d="M100 255 C96 210, 104 160, 100 110 C98 85, 102 70, 100 55" />
-            <ellipse class="growth-leaf delay-1" cx="72" cy="200" rx="28" ry="12" transform="rotate(-28 72 200)" />
-            <ellipse class="growth-leaf r delay-2" cx="128" cy="175" rx="30" ry="12" transform="rotate(30 128 175)" />
-            <ellipse class="growth-leaf delay-3" cx="68" cy="140" rx="26" ry="11" transform="rotate(-34 68 140)" />
-            <ellipse class="growth-leaf r delay-4" cx="132" cy="115" rx="28" ry="11" transform="rotate(32 132 115)" />
-            <g id="growth-flowers"></g>
-          </g>
-        </g>
-
-        <ellipse class="growth-tip" cx="100" cy="252" rx="5" ry="14" />
-
-        <g class="growth-seed">
-          <ellipse class="growth-seed-left" cx="94" cy="268" rx="11" ry="8" />
-          <ellipse class="growth-seed-right" cx="106" cy="268" rx="11" ry="8" />
-        </g>
-      </svg>
-      <p class="growth-caption" id="growth-caption">씨앗을 기다리는 중</p>
-      <p class="growth-days" id="growth-days"></p>
-    </div>
-  </aside>
-
   <!-- 홈: 캘린더로 전체 기록 보기 -->
   <main class="stage" id="archive-view">
     <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
@@ -1361,21 +1348,56 @@
 
     <p class="streak archive-streak" id="archive-streak" aria-live="polite">로그인하면 기록이 캘린더에 모여요</p>
 
-    <section class="calendar" aria-label="기록 캘린더">
-      <div class="cal-head">
-        <button type="button" class="cal-nav" id="cal-prev" aria-label="이전 달">‹</button>
-        <h2 class="cal-title" id="cal-title">2026년 7월</h2>
-        <button type="button" class="cal-nav" id="cal-next" aria-label="다음 달">›</button>
-      </div>
-      <div class="cal-week" aria-hidden="true">
-        <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
-      </div>
-      <div class="cal-days" id="cal-days"></div>
-      <div class="cal-legend" aria-hidden="true">
-        <span><i class="lg-done"></i>기록한 날</span>
-        <span><i class="lg-none"></i>기록 안 한 날</span>
-      </div>
-    </section>
+    <div class="calendar-row">
+      <section class="calendar" aria-label="기록 캘린더">
+        <div class="cal-head">
+          <button type="button" class="cal-nav" id="cal-prev" aria-label="이전 달">‹</button>
+          <h2 class="cal-title" id="cal-title">2026년 7월</h2>
+          <button type="button" class="cal-nav" id="cal-next" aria-label="다음 달">›</button>
+        </div>
+        <div class="cal-week" aria-hidden="true">
+          <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+        <div class="cal-legend" aria-hidden="true">
+          <span><i class="lg-done"></i>기록한 날</span>
+          <span><i class="lg-none"></i>기록 안 한 날</span>
+        </div>
+      </section>
+
+      <aside class="growth-panel" id="growth-panel" aria-label="기록으로 자라는 식물">
+        <div class="growth-scene" id="growth-scene" data-stage="idle">
+          <div class="growth-fx" id="growth-fx" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <svg class="growth-svg" viewBox="0 0 200 320" role="img" aria-hidden="true">
+            <ellipse class="growth-soil" cx="100" cy="292" rx="78" ry="18" />
+            <ellipse class="growth-soil-top" cx="100" cy="286" rx="62" ry="10" opacity="0.55" />
+            <circle class="growth-aura" cx="100" cy="268" r="28" />
+
+            <g class="growth-sway">
+              <g class="growth-stem-group">
+                <path class="growth-stem" d="M100 255 C96 210, 104 160, 100 110 C98 85, 102 70, 100 55" />
+                <ellipse class="growth-leaf delay-1" cx="72" cy="200" rx="28" ry="12" transform="rotate(-28 72 200)" />
+                <ellipse class="growth-leaf r delay-2" cx="128" cy="175" rx="30" ry="12" transform="rotate(30 128 175)" />
+                <ellipse class="growth-leaf delay-3" cx="68" cy="140" rx="26" ry="11" transform="rotate(-34 68 140)" />
+                <ellipse class="growth-leaf r delay-4" cx="132" cy="115" rx="28" ry="11" transform="rotate(32 132 115)" />
+                <g id="growth-flowers"></g>
+              </g>
+            </g>
+
+            <ellipse class="growth-tip" cx="100" cy="252" rx="5" ry="14" />
+
+            <g class="growth-seed">
+              <ellipse class="growth-seed-left" cx="94" cy="268" rx="11" ry="8" />
+              <ellipse class="growth-seed-right" cx="106" cy="268" rx="11" ry="8" />
+            </g>
+          </svg>
+          <p class="growth-caption" id="growth-caption">씨앗을 기다리는 중</p>
+          <p class="growth-days" id="growth-days"></p>
+        </div>
+      </aside>
+    </div>
 
     <section class="archive-detail" id="archive-detail">
       <p class="archive-date" id="archive-date"></p>
