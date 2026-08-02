@@ -1100,6 +1100,10 @@
       transition: transform 1.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
     }
 
+    .growth-sway {
+      transform-origin: 100px 286px;
+    }
+
     .growth-scene[data-stage="idle"] .growth-stem-group,
     .growth-scene[data-stage="seed"] .growth-stem-group {
       opacity: 0;
@@ -1107,18 +1111,31 @@
       pointer-events: none;
     }
 
+    .growth-scene[data-stage="sprout"] .growth-sway,
+    .growth-scene[data-stage="stem"] .growth-sway,
+    .growth-scene[data-stage="flower"] .growth-sway {
+      animation: plant-sway 2.6s ease-in-out infinite;
+    }
+
     .growth-scene[data-stage="sprout"] .growth-stem-group,
     .growth-scene[data-stage="stem"] .growth-stem-group,
     .growth-scene[data-stage="flower"] .growth-stem-group {
       opacity: 1;
       visibility: visible;
-      animation: stem-sway 3.6s ease-in-out infinite;
     }
 
+    .growth-scene[data-stage="idle"] #growth-flowers,
+    .growth-scene[data-stage="seed"] #growth-flowers,
     .growth-scene[data-stage="sprout"] #growth-flowers,
     .growth-scene[data-stage="stem"] #growth-flowers {
       opacity: 0;
       visibility: hidden;
+      pointer-events: none;
+    }
+
+    .growth-scene[data-stage="flower"] #growth-flowers {
+      opacity: 1;
+      visibility: visible;
     }
 
     .growth-tip {
@@ -1171,16 +1188,28 @@
 
     .growth-flower {
       opacity: 0;
-      transition: opacity 0.55s ease;
     }
 
     .growth-flower.is-on {
       opacity: 1;
-      animation: flower-bob 2.8s ease-in-out infinite;
+    }
+
+    .growth-flower.is-on .growth-flower-inner {
+      transform-origin: 0px 0px;
+      animation: flower-sway 2.2s ease-in-out infinite;
     }
 
     .growth-flower.is-new {
-      animation: flower-pop 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+      opacity: 1;
+    }
+
+    .growth-flower.is-new .growth-flower-inner {
+      animation: flower-pop 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .growth-flower .petal {
+      stroke: rgba(255, 255, 255, 0.35);
+      stroke-width: 0.6;
     }
 
     .growth-fx {
@@ -1204,11 +1233,11 @@
     }
 
     .growth-fx span:nth-child(1) { left: 48%; top: 42%; }
-    .growth-fx span:nth-child(2) { left: 28%; top: 55%; background: #d4a574; }
-    .growth-fx span:nth-child(3) { left: 68%; top: 50%; background: #6aa884; }
-    .growth-fx span:nth-child(4) { left: 38%; top: 30%; }
-    .growth-fx span:nth-child(5) { left: 60%; top: 28%; background: #d4a574; }
-    .growth-fx span:nth-child(6) { left: 50%; top: 18%; background: #8fbf9f; }
+    .growth-fx span:nth-child(2) { left: 28%; top: 55%; background: #ff9f1c; }
+    .growth-fx span:nth-child(3) { left: 68%; top: 50%; background: #4cc9f0; }
+    .growth-fx span:nth-child(4) { left: 38%; top: 30%; background: #ff4d6d; }
+    .growth-fx span:nth-child(5) { left: 60%; top: 28%; background: #c77dff; }
+    .growth-fx span:nth-child(6) { left: 50%; top: 18%; background: #ffd60a; }
 
     .growth-caption {
       margin-top: 0.55rem;
@@ -1235,20 +1264,20 @@
       50% { transform: scale(1.02); }
     }
 
-    @keyframes stem-sway {
-      0%, 100% { transform: scaleY(var(--stem)) rotate(-1.2deg); }
-      50% { transform: scaleY(var(--stem)) rotate(1.2deg); }
+    @keyframes plant-sway {
+      0%, 100% { transform: rotate(-3.2deg); }
+      50% { transform: rotate(3.2deg); }
     }
 
-    @keyframes flower-bob {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-2px); }
+    @keyframes flower-sway {
+      0%, 100% { transform: rotate(-6deg) translateX(-1px); }
+      50% { transform: rotate(6deg) translateX(1px); }
     }
 
     @keyframes flower-pop {
-      0% { opacity: 0; transform: scale(0.2); }
-      65% { opacity: 1; transform: scale(1.18); }
-      100% { opacity: 1; transform: scale(1); }
+      0% { opacity: 0; transform: scale(0.15) rotate(-20deg); }
+      70% { opacity: 1; transform: scale(1.15) rotate(4deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
     }
 
     @keyframes growth-fx-burst {
@@ -1297,14 +1326,16 @@
         <ellipse class="growth-soil-top" cx="100" cy="286" rx="62" ry="10" opacity="0.55" />
         <circle class="growth-aura" cx="100" cy="268" r="28" />
 
-        <g class="growth-stem-group">
-          <path class="growth-stem" d="M100 255 C96 210, 104 160, 100 110 C98 85, 102 70, 100 55" />
-          <ellipse class="growth-leaf delay-1" cx="72" cy="200" rx="28" ry="12" transform="rotate(-28 72 200)" />
-          <ellipse class="growth-leaf r delay-2" cx="128" cy="175" rx="30" ry="12" transform="rotate(30 128 175)" />
-          <ellipse class="growth-leaf delay-3" cx="68" cy="140" rx="26" ry="11" transform="rotate(-34 68 140)" />
-          <ellipse class="growth-leaf r delay-4" cx="132" cy="115" rx="28" ry="11" transform="rotate(32 132 115)" />
+        <g class="growth-sway">
+          <g class="growth-stem-group">
+            <path class="growth-stem" d="M100 255 C96 210, 104 160, 100 110 C98 85, 102 70, 100 55" />
+            <ellipse class="growth-leaf delay-1" cx="72" cy="200" rx="28" ry="12" transform="rotate(-28 72 200)" />
+            <ellipse class="growth-leaf r delay-2" cx="128" cy="175" rx="30" ry="12" transform="rotate(30 128 175)" />
+            <ellipse class="growth-leaf delay-3" cx="68" cy="140" rx="26" ry="11" transform="rotate(-34 68 140)" />
+            <ellipse class="growth-leaf r delay-4" cx="132" cy="115" rx="28" ry="11" transform="rotate(32 132 115)" />
+            <g id="growth-flowers"></g>
+          </g>
         </g>
-        <g id="growth-flowers"></g>
 
         <ellipse class="growth-tip" cx="100" cy="252" rx="5" ry="14" />
 
@@ -1708,48 +1739,71 @@
     }
 
     const FLOWER_SPOTS = [
-      { x: 100, y: 52 },
-      { x: 74, y: 66 },
-      { x: 126, y: 66 },
-      { x: 58, y: 92 },
-      { x: 142, y: 92 },
-      { x: 86, y: 38 },
-      { x: 114, y: 38 },
-      { x: 100, y: 24 },
-      { x: 68, y: 48 },
-      { x: 132, y: 48 },
-      { x: 48, y: 118 },
-      { x: 152, y: 118 }
+      { x: 100, y: 48 },
+      { x: 68, y: 70 },
+      { x: 132, y: 70 },
+      { x: 52, y: 100 },
+      { x: 148, y: 100 },
+      { x: 84, y: 32 },
+      { x: 116, y: 32 },
+      { x: 100, y: 18 },
+      { x: 60, y: 48 },
+      { x: 140, y: 48 },
+      { x: 40, y: 128 },
+      { x: 160, y: 128 }
     ];
+
+    const PETAL_COLORS = ["#ff4d6d", "#ff9f1c", "#ffd60a", "#80ed99", "#4cc9f0", "#c77dff"];
 
     function renderGrowthFlowers(count, animateNew) {
       if (!growthFlowers) return;
       const prev = growthFlowers.querySelectorAll(".growth-flower").length;
       const n = Math.max(0, Math.min(count, FLOWER_SPOTS.length));
-      growthFlowers.innerHTML = "";
+      while (growthFlowers.firstChild) growthFlowers.removeChild(growthFlowers.firstChild);
       const svgNS = "http://www.w3.org/2000/svg";
+
       for (let i = 0; i < n; i++) {
         const spot = FLOWER_SPOTS[i];
         const g = document.createElementNS(svgNS, "g");
-        g.setAttribute("class", "growth-flower" + (animateNew && i >= prev ? " is-new" : ""));
+        const isNew = animateNew && i >= prev;
+        g.setAttribute("class", "growth-flower" + (isNew ? " is-new" : " is-on"));
         g.setAttribute("transform", "translate(" + spot.x + " " + spot.y + ")");
-        g.style.transitionDelay = (i * 0.06) + "s";
+        g.style.transitionDelay = (i * 0.08) + "s";
 
-        const parts = [
-          { tag: "circle", attrs: { r: "13", fill: "#d4a574" } },
-          { tag: "circle", attrs: { r: "6.5", fill: "#f3e6c8" } },
-          { tag: "circle", attrs: { cx: "-8", cy: "-2", r: "5.5", fill: "#c9955f", opacity: "0.9" } },
-          { tag: "circle", attrs: { cx: "8", cy: "-2", r: "5.5", fill: "#c9955f", opacity: "0.9" } },
-          { tag: "circle", attrs: { cx: "0", cy: "8", r: "5.5", fill: "#c9955f", opacity: "0.85" } }
-        ];
-        parts.forEach((part) => {
-          const el = document.createElementNS(svgNS, part.tag);
-          Object.keys(part.attrs).forEach((k) => el.setAttribute(k, part.attrs[k]));
-          g.appendChild(el);
-        });
+        const inner = document.createElementNS(svgNS, "g");
+        inner.setAttribute("class", "growth-flower-inner");
 
+        for (let p = 0; p < PETAL_COLORS.length; p++) {
+          const angle = p * 60;
+          const petal = document.createElementNS(svgNS, "ellipse");
+          petal.setAttribute("class", "petal");
+          petal.setAttribute("cx", "0");
+          petal.setAttribute("cy", "-15");
+          petal.setAttribute("rx", "8");
+          petal.setAttribute("ry", "16");
+          petal.setAttribute("fill", PETAL_COLORS[p]);
+          petal.setAttribute("transform", "rotate(" + angle + " 0 0)");
+          inner.appendChild(petal);
+        }
+
+        const centerOuter = document.createElementNS(svgNS, "circle");
+        centerOuter.setAttribute("r", "7");
+        centerOuter.setAttribute("fill", "#ffe66d");
+        inner.appendChild(centerOuter);
+
+        const centerInner = document.createElementNS(svgNS, "circle");
+        centerInner.setAttribute("r", "3.5");
+        centerInner.setAttribute("fill", "#fff8e7");
+        inner.appendChild(centerInner);
+
+        g.appendChild(inner);
         growthFlowers.appendChild(g);
-        requestAnimationFrame(() => g.classList.add("is-on"));
+        if (isNew) {
+          requestAnimationFrame(() => {
+            g.classList.remove("is-new");
+            g.classList.add("is-on");
+          });
+        }
       }
     }
 
