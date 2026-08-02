@@ -156,6 +156,17 @@
       animation: fade-in 1s ease 0.2s both;
     }
 
+    .brand-line {
+      margin-top: -1.15rem;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 400;
+      line-height: 1.5;
+      letter-spacing: 0.01em;
+      color: var(--muted);
+      animation: fade-in 1s ease 0.25s both;
+    }
+
     .tagline {
       width: 100%;
       text-align: center;
@@ -766,6 +777,86 @@
       to { opacity: 1; }
     }
 
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      background: rgba(26, 29, 26, 0.38);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      animation: fade-in 0.2s ease both;
+    }
+
+    .confirm-overlay.hidden {
+      display: none !important;
+    }
+
+    .confirm-dialog {
+      width: min(100%, 300px);
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 48px -28px rgba(26, 29, 26, 0.45);
+      padding: 1.45rem 1.25rem 1.2rem;
+      text-align: center;
+      animation: rise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .confirm-dialog p {
+      margin: 0;
+      font-size: 0.98rem;
+      font-weight: 500;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+
+    .confirm-dialog .confirm-date {
+      margin-top: 0.35rem;
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .confirm-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+
+    .confirm-actions button {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.65rem 0.5rem;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
+    }
+
+    .confirm-actions button:hover {
+      background: rgba(26, 29, 26, 0.04);
+      border-color: rgba(26, 29, 26, 0.22);
+    }
+
+    .confirm-actions .confirm-yes {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .confirm-actions .confirm-yes:hover {
+      filter: brightness(1.05);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
     @media (max-width: 480px) {
       body {
         padding: 2rem 1rem 2.5rem;
@@ -794,6 +885,7 @@
   <main class="stage" id="archive-view">
     <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
     <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
+    <p class="brand-line">하루 단 1장의 사진이나 이미지, 단 1줄로 오늘 기록.</p>
 
     <p class="streak archive-streak" id="archive-streak" aria-live="polite">로그인하면 기록이 캘린더에 모여요</p>
 
@@ -825,6 +917,7 @@
   <main class="stage hidden" id="app-view">
     <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
     <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
+    <p class="brand-line">하루 단 1장의 사진이나 이미지, 단 1줄로 오늘 기록.</p>
 
     <p class="tagline">
       <em>평범하고 치열한 오늘도 언젠간 추억이 됩니다.</em>
@@ -867,6 +960,7 @@
   <main class="stage hidden" id="auth-view">
     <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
     <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
+    <p class="brand-line">하루 단 1장의 사진이나 이미지, 단 1줄로 오늘 기록.</p>
 
     <section class="auth-card" aria-label="로그인">
       <div class="tabs" role="tablist">
@@ -912,6 +1006,24 @@
     </section>
   </main>
 
+  <div class="confirm-overlay hidden" id="confirm-overlay" role="presentation">
+    <div
+      class="confirm-dialog"
+      id="confirm-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-date"
+    >
+      <p id="confirm-title">기록하시겠습니까?</p>
+      <p class="confirm-date" id="confirm-date"></p>
+      <div class="confirm-actions">
+        <button type="button" id="confirm-no">아니오</button>
+        <button type="button" class="confirm-yes" id="confirm-yes">예</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const USERS_KEY = "focusnow_users";
     const SESSION_KEY = "focusnow_session";
@@ -946,6 +1058,10 @@
     const charCount = document.getElementById("char-count");
     const streakEl = document.getElementById("streak");
     const archiveStreakEl = document.getElementById("archive-streak");
+    const confirmOverlay = document.getElementById("confirm-overlay");
+    const confirmDateEl = document.getElementById("confirm-date");
+    const confirmYesBtn = document.getElementById("confirm-yes");
+    const confirmNoBtn = document.getElementById("confirm-no");
     const calTitle = document.getElementById("cal-title");
     const calDays = document.getElementById("cal-days");
     const calPrev = document.getElementById("cal-prev");
@@ -1366,9 +1482,20 @@
             archiveEmpty.classList.remove("hidden");
             archiveEmpty.textContent = "로그인하면 날짜별 기록을 볼 수 있어요";
           }
+          openRecordConfirm(dateKey);
         });
         calDays.appendChild(btn);
       }
+    }
+
+    function openRecordConfirm(dateKey) {
+      confirmDateEl.textContent = formatDisplayDate(dateKey);
+      confirmOverlay.classList.remove("hidden");
+      confirmYesBtn.focus();
+    }
+
+    function closeRecordConfirm() {
+      confirmOverlay.classList.add("hidden");
     }
 
     function showArchiveDay(userId, dateKey) {
@@ -1515,6 +1642,25 @@
 
     openWriteBtn.addEventListener("click", () => {
       showWrite(currentUser());
+    });
+
+    confirmYesBtn.addEventListener("click", () => {
+      closeRecordConfirm();
+      showWrite(currentUser());
+    });
+
+    confirmNoBtn.addEventListener("click", () => {
+      closeRecordConfirm();
+    });
+
+    confirmOverlay.addEventListener("click", (e) => {
+      if (e.target === confirmOverlay) closeRecordConfirm();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !confirmOverlay.classList.contains("hidden")) {
+        closeRecordConfirm();
+      }
     });
 
     calPrev.addEventListener("click", () => {
