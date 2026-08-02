@@ -559,6 +559,21 @@
       font-weight: 600;
     }
 
+    .streak-title {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-family: "Syne", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+    }
+
+    .streak-title .lv {
+      font-weight: 600;
+      opacity: 0.85;
+    }
+
     .archive-streak {
       margin-top: 0;
       padding: 0.85rem 0.9rem;
@@ -1199,9 +1214,36 @@
       return data.streak;
     }
 
+    /**
+     * 연속 일수 → 칭호·레벨
+     * 1~7일: 씨앗 Lv.1~7
+     * 8~14일: 새싹 Lv.1~7 (8일=Lv.1, 하루 +1) — 15일 연속 달성 시 다음 칭호로 변경
+     * 15~30일: 꾸준함의 대명사 Lv.1~16 (15일=Lv.1, 하루 +1)
+     */
+    function getTitleRank(streak) {
+      const days = Math.max(0, Number(streak) || 0);
+      if (days < 1) return null;
+      if (days <= 7) {
+        return { title: "씨앗", level: days, days: days };
+      }
+      if (days < 15) {
+        return { title: "새싹", level: days - 7, days: days };
+      }
+      const level = Math.min(days, 30) - 14;
+      return { title: "꾸준함의 대명사", level: level, days: days };
+    }
+
     function streakText(user) {
       const days = getDisplayStreak(user.id);
-      return user.name + "님은 현재 <strong>" + days + "일</strong> 연속으로 소중한 하루를 기록중 입니다.";
+      const rank = getTitleRank(days);
+      if (!rank) {
+        return user.name + "님, 오늘 한 장·한 줄로 시작해보세요.";
+      }
+      return (
+        '<span class="streak-title">' + rank.title +
+        ' <span class="lv">Lv.' + rank.level + "</span></span>" +
+        user.name + "님은 현재 <strong>" + days + "일</strong> 연속으로 소중한 하루를 기록 중입니다."
+      );
     }
 
     function updateStreakMessage(user) {
@@ -1411,7 +1453,7 @@
         }
       }
 
-      if (touch && (data.image || data.caption.trim())) {
+      if (touch && data.image && data.caption.trim()) {
         touchStreak(session.id);
         const user = currentUser();
         if (user) updateStreakMessage(user);
