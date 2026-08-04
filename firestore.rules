@@ -69,23 +69,27 @@ service cloud.firestore {
     }
 
     function rainbowFieldsOk() {
-      // Already claimed: immutable
-      if ('rainbowAura' in resource.data) {
-        return request.resource.data.rainbowAura == resource.data.rainbowAura
+      return (
+        (
+          'rainbowAura' in resource.data
+          && request.resource.data.rainbowAura == resource.data.rainbowAura
           && request.resource.data.streak7Order == resource.data.streak7Order
           && (
             (!('streak7At' in resource.data) && !('streak7At' in request.resource.data))
             || request.resource.data.streak7At == resource.data.streak7At
-          );
-      }
-      // Not claiming rainbow this update
-      if (!('rainbowAura' in request.resource.data)
-        && !('streak7Order' in request.resource.data)
-        && !('streak7At' in request.resource.data)) {
-        return true;
-      }
-      // First-time claim
-      return hasValidRainbowClaim(request.resource.data);
+          )
+        )
+        || (
+          !('rainbowAura' in resource.data)
+          && !('rainbowAura' in request.resource.data)
+          && !('streak7Order' in request.resource.data)
+          && !('streak7At' in request.resource.data)
+        )
+        || (
+          !('rainbowAura' in resource.data)
+          && hasValidRainbowClaim(request.resource.data)
+        )
+      );
     }
 
     match /users/{userId} {
