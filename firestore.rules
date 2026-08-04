@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: user login id (lowercase a-z0-9_)
+    // Fields:
+    //   id: string (same as document ID)
+    //   name: string (display name, 1-40 chars)
+    //   passwordHash: string (SHA-256 hex)
+    //   createdAt: string (ISO timestamp)
+    //   lastLoginAt: string (ISO timestamp, optional until first login)
+    //
+    // Auth note: app uses custom id/password (not Firebase Auth yet),
+    // so signup/login need unauthenticated get + create on users/{id}.
+    // List is denied so accounts cannot be scraped.
+    // ===============================================================
+
+    function isValidUserId(userId) {
+      return userId is string
+        && userId.size() >= 3
+        && userId.size() <= 40
+        && userId.matches('^[a-z0-9_]+$');
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['id', 'name', 'passwordHash', 'createdAt'])
+        && data.id is string
+        && data.name is string
+        && data.name.size() >= 1
+        && data.name.size() <= 40
+        && data.passwordHash is string
+        && data.passwordHash.size() == 64
+        && data.createdAt is string
+        && (!('lastLoginAt' in data) || data.lastLoginAt is string);
+    }
+
+    match /users/{userId} {
+      allow get: if isValidUserId(userId);
+      allow list: if false;
+
+      allow create: if isValidUserId(userId)
+        && isValidUser(request.resource.data)
+        && request.resource.data.id == userId
+        && !('lastLoginAt' in request.resource.data);
+
+      allow update: if isValidUserId(userId)
+        && isValidUser(request.resource.data)
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.passwordHash == resource.data.passwordHash
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['lastLoginAt', 'name']);
+
+      allow delete: if false;
+    }
+  }
+}

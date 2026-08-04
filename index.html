@@ -1792,10 +1792,26 @@
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
   <script>
     const USERS_KEY = "focusnow_users";
     const SESSION_KEY = "focusnow_session";
     const CAPTION_MAX = 20;
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCvBTUQ0y9QhSQbgfxG9gcS8iJ0HSHNsRc",
+      authDomain: "greedy-garden.firebaseapp.com",
+      projectId: "greedy-garden",
+      storageBucket: "greedy-garden.firebasestorage.app",
+      messagingSenderId: "77518091588",
+      appId: "1:77518091588:web:3d92dc430ff9182da85311",
+      measurementId: "G-CB4QMHPV2M"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const usersCol = db.collection("users");
 
     const authView = document.getElementById("auth-view");
     const appView = document.getElementById("app-view");
@@ -2307,15 +2323,73 @@
       return String(id || "").trim().toLowerCase();
     }
 
-    function findUser(id) {
-      const key = normalizeId(id);
-      return getUsers().find((u) => u.id === key);
-    }
-
     function currentUser() {
       const session = getSession();
-      if (!session) return null;
-      return findUser(session.id) || null;
+      if (!session || !session.id) return null;
+      return { id: session.id, name: session.name || session.id };
+    }
+
+    function findLocalUser(id) {
+      const key = normalizeId(id);
+      return getUsers().find((u) => u.id === key) || null;
+    }
+
+    function upsertLocalUser(user) {
+      const users = getUsers().filter((u) => u.id !== user.id);
+      users.push({ id: user.id, name: user.name, password: user.password || "" });
+      saveUsers(users);
+    }
+
+    async function hashPassword(id, password) {
+      const payload = "focusnow:" + id + ":" + password;
+      const bytes = new TextEncoder().encode(payload);
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(digest))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    async function fetchRemoteUser(id) {
+      const key = normalizeId(id);
+      if (!key) return null;
+      const snap = await usersCol.doc(key).get();
+      if (!snap.exists) return null;
+      return snap.data();
+    }
+
+    async function remoteUserExists(id) {
+      const user = await fetchRemoteUser(id);
+      return !!user;
+    }
+
+    async function createRemoteUser({ id, name, password }) {
+      const passwordHash = await hashPassword(id, password);
+      const payload = {
+        id,
+        name,
+        passwordHash,
+        createdAt: new Date().toISOString()
+      };
+      await usersCol.doc(id).set(payload);
+      return payload;
+    }
+
+    async function touchRemoteLogin(id, name) {
+      await usersCol.doc(id).update({
+        name: name,
+        lastLoginAt: new Date().toISOString()
+      });
+    }
+
+    async function migrateLocalUserToRemote(localUser) {
+      if (!localUser || !localUser.password) return null;
+      const exists = await remoteUserExists(localUser.id);
+      if (exists) return fetchRemoteUser(localUser.id);
+      return createRemoteUser({
+        id: localUser.id,
+        name: localUser.name,
+        password: localUser.password
+      });
     }
 
     function updateTopbar(user) {
@@ -2627,7 +2701,7 @@
 
     signupId.addEventListener("input", resetIdCheck);
 
-    checkIdBtn.addEventListener("click", () => {
+    checkIdBtn.addEventListener("click", async () => {
       const id = normalizeId(signupId.value);
       if (!id) {
         setIdStatus("아이디를 입력하세요.", "err");
@@ -2647,18 +2721,31 @@
         idAvailable = false;
         return;
       }
-      if (findUser(id)) {
-        setIdStatus("이미 사용 중인 아이디입니다.", "err");
-        idChecked = true;
+
+      setIdStatus("확인 중…", "");
+      checkIdBtn.disabled = true;
+      try {
+        const taken = (await remoteUserExists(id)) || !!findLocalUser(id);
+        if (taken) {
+          setIdStatus("이미 사용 중인 아이디입니다.", "err");
+          idChecked = true;
+          idAvailable = false;
+        } else {
+          setIdStatus("사용 가능한 아이디입니다.", "ok");
+          idChecked = true;
+          idAvailable = true;
+        }
+      } catch (err) {
+        console.error(err);
+        setIdStatus("확인에 실패했습니다. 잠시 후 다시 시도하세요.", "err");
+        idChecked = false;
         idAvailable = false;
-        return;
+      } finally {
+        checkIdBtn.disabled = false;
       }
-      setIdStatus("사용 가능한 아이디입니다.", "ok");
-      idChecked = true;
-      idAvailable = true;
     });
 
-    signupForm.addEventListener("submit", (e) => {
+    signupForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       signupMsg.className = "form-msg";
       signupMsg.textContent = "";
@@ -2682,48 +2769,86 @@
         signupMsg.classList.add("err");
         return;
       }
-      if (findUser(id)) {
-        setIdStatus("이미 사용 중인 아이디입니다.", "err");
-        idAvailable = false;
-        signupMsg.textContent = "다른 아이디를 사용하세요.";
+
+      signupMsg.textContent = "가입 처리 중…";
+      try {
+        if (await remoteUserExists(id)) {
+          setIdStatus("이미 사용 중인 아이디입니다.", "err");
+          idAvailable = false;
+          signupMsg.textContent = "다른 아이디를 사용하세요.";
+          signupMsg.classList.add("err");
+          return;
+        }
+
+        await createRemoteUser({ id, name, password });
+        upsertLocalUser({ id, name, password });
+
+        signupMsg.textContent = "가입 완료! 로그인해주세요.";
+        signupMsg.classList.add("ok");
+        signupForm.reset();
+        resetIdCheck();
+
+        setTimeout(() => {
+          switchTab("login");
+          document.getElementById("login-id").value = id;
+          document.getElementById("login-pw").focus();
+        }, 600);
+      } catch (err) {
+        console.error(err);
+        signupMsg.textContent = "가입에 실패했습니다. 잠시 후 다시 시도하세요.";
         signupMsg.classList.add("err");
-        return;
       }
-
-      const users = getUsers();
-      users.push({ id, name, password });
-      saveUsers(users);
-
-      signupMsg.textContent = "가입 완료! 로그인해주세요.";
-      signupMsg.classList.add("ok");
-      signupForm.reset();
-      resetIdCheck();
-
-      setTimeout(() => {
-        switchTab("login");
-        document.getElementById("login-id").value = id;
-        document.getElementById("login-pw").focus();
-      }, 600);
     });
 
-    loginForm.addEventListener("submit", (e) => {
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       loginMsg.className = "form-msg";
       loginMsg.textContent = "";
 
       const id = normalizeId(document.getElementById("login-id").value);
       const password = document.getElementById("login-pw").value;
-      const user = findUser(id);
-
-      if (!user || user.password !== password) {
-        loginMsg.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
+      if (!id || !password) {
+        loginMsg.textContent = "아이디와 비밀번호를 입력하세요.";
         loginMsg.classList.add("err");
         return;
       }
 
-      setSession(user);
-      loginForm.reset();
-      showHome(user);
+      loginMsg.textContent = "로그인 중…";
+      try {
+        let remote = await fetchRemoteUser(id);
+        const local = findLocalUser(id);
+
+        if (!remote && local && local.password) {
+          remote = await migrateLocalUserToRemote(local);
+        }
+
+        const passwordHash = await hashPassword(id, password);
+        const remoteOk = remote && remote.passwordHash === passwordHash;
+        const localOk = local && local.password === password;
+
+        if (!remoteOk && !localOk) {
+          loginMsg.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
+          loginMsg.classList.add("err");
+          return;
+        }
+
+        const name = (remote && remote.name) || (local && local.name) || id;
+        if (remoteOk) {
+          await touchRemoteLogin(id, name);
+        } else if (localOk && !remote) {
+          await migrateLocalUserToRemote(local);
+        }
+
+        const user = { id, name };
+        upsertLocalUser({ id, name, password });
+        setSession(user);
+        loginForm.reset();
+        showHome(user);
+      } catch (err) {
+        console.error(err);
+        loginMsg.textContent = "로그인에 실패했습니다. 잠시 후 다시 시도하세요.";
+        loginMsg.classList.add("err");
+      }
     });
 
     openAuthBtn.addEventListener("click", () => {
