@@ -1,4 +1,5 @@
 .vercel
 .netlify
+.firebase
 .DS_Store
 Thumbs.db
