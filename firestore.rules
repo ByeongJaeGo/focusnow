@@ -5,18 +5,13 @@ service cloud.firestore {
     // Assumed Data Model
     // ===============================================================
     //
-    // Collection: users
-    // Document ID: user login id (lowercase a-z0-9_)
-    // Fields:
-    //   id: string (same as document ID)
-    //   name: string (display name, 1-40 chars)
-    //   passwordHash: string (SHA-256 hex)
-    //   createdAt: string (ISO timestamp)
-    //   lastLoginAt: string (ISO timestamp, optional until first login)
+    // Collection: users/{userId}
+    //   id, name, passwordHash, createdAt
+    //   lastLoginAt? (optional)
+    //   signupOrder?, goldenFlower? (required on new signups)
     //
-    // Auth note: app uses custom id/password (not Firebase Auth yet),
-    // so signup/login need unauthenticated get + create on users/{id}.
-    // List is denied so accounts cannot be scraped.
+    // Collection: meta/signup
+    //   count: int (increment-only signup counter)
     // ===============================================================
 
     function isValidUserId(userId) {
@@ -26,7 +21,7 @@ service cloud.firestore {
         && userId.matches('^[a-z0-9_]+$');
     }
 
-    function isValidUser(data) {
+    function hasBaseUserFields(data) {
       return data.keys().hasAll(['id', 'name', 'passwordHash', 'createdAt'])
         && data.id is string
         && data.name is string
@@ -38,22 +33,66 @@ service cloud.firestore {
         && (!('lastLoginAt' in data) || data.lastLoginAt is string);
     }
 
+    function hasGoldenFields(data) {
+      return data.keys().hasAll(['signupOrder', 'goldenFlower'])
+        && data.signupOrder is int
+        && data.signupOrder >= 1
+        && data.goldenFlower is bool
+        && data.goldenFlower == (data.signupOrder <= 50);
+    }
+
+    function isValidNewUser(data) {
+      return hasBaseUserFields(data) && hasGoldenFields(data);
+    }
+
+    function goldenFieldsUnchanged() {
+      return (
+        (!('signupOrder' in resource.data)
+          && !('signupOrder' in request.resource.data)
+          && !('goldenFlower' in request.resource.data))
+        || (
+          'signupOrder' in resource.data
+          && 'goldenFlower' in resource.data
+          && request.resource.data.signupOrder == resource.data.signupOrder
+          && request.resource.data.goldenFlower == resource.data.goldenFlower
+        )
+      );
+    }
+
     match /users/{userId} {
       allow get: if isValidUserId(userId);
       allow list: if false;
 
       allow create: if isValidUserId(userId)
-        && isValidUser(request.resource.data)
+        && isValidNewUser(request.resource.data)
         && request.resource.data.id == userId
         && !('lastLoginAt' in request.resource.data);
 
       allow update: if isValidUserId(userId)
-        && isValidUser(request.resource.data)
+        && hasBaseUserFields(request.resource.data)
         && request.resource.data.id == resource.data.id
         && request.resource.data.passwordHash == resource.data.passwordHash
         && request.resource.data.createdAt == resource.data.createdAt
+        && goldenFieldsUnchanged()
         && request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['lastLoginAt', 'name']);
+
+      allow delete: if false;
+    }
+
+    match /meta/{docId} {
+      allow get: if docId == 'signup';
+      allow list: if false;
+
+      allow create: if docId == 'signup'
+        && request.resource.data.keys().hasOnly(['count'])
+        && request.resource.data.count is int
+        && request.resource.data.count == 1;
+
+      allow update: if docId == 'signup'
+        && request.resource.data.keys().hasOnly(['count'])
+        && request.resource.data.count is int
+        && request.resource.data.count == resource.data.count + 1;
 
       allow delete: if false;
     }

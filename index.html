@@ -1224,6 +1224,117 @@
       filter: brightness(1.05);
     }
 
+    .promo-dialog {
+      width: min(100%, 360px);
+      text-align: left;
+    }
+
+    .promo-dialog .promo-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #b8860b;
+      margin-bottom: 0.45rem;
+    }
+
+    .promo-dialog h2 {
+      font-family: "Syne", sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.3;
+      margin-bottom: 0.55rem;
+    }
+
+    .promo-dialog .promo-body {
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: var(--muted);
+      margin-bottom: 0.85rem;
+    }
+
+    .promo-dialog .promo-remain {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #8a6a12;
+      background: rgba(255, 214, 90, 0.28);
+      border: 1px solid rgba(184, 134, 11, 0.35);
+      padding: 0.35rem 0.65rem;
+      margin-bottom: 1rem;
+    }
+
+    .promo-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .promo-actions button {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.72rem 0.5rem;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: filter 0.2s ease, background 0.2s ease;
+    }
+
+    .promo-actions button.primary {
+      border-color: #b8860b;
+      background: linear-gradient(135deg, #f0c84a, #d4a017);
+      color: #2a2108;
+    }
+
+    .promo-actions button:hover {
+      filter: brightness(1.03);
+    }
+
+    .promo-copy-msg {
+      min-height: 1.2em;
+      margin-top: 0.35rem;
+      font-size: 0.78rem;
+      color: var(--ok);
+      text-align: center;
+    }
+
+    .share-bar {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.45rem;
+      margin-top: -0.35rem;
+    }
+
+    .share-bar button {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.4rem 0.75rem;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .share-bar button:hover {
+      background: #fff;
+      border-color: rgba(26, 29, 26, 0.22);
+    }
+
+    .share-bar button.gold {
+      border-color: rgba(184, 134, 11, 0.4);
+      background: rgba(255, 214, 90, 0.22);
+      color: #8a6a12;
+    }
+
     /* 성장 식물 장면 */
     .growth-scene {
       width: 100%;
@@ -1408,6 +1519,67 @@
       stroke-width: 0.6;
     }
 
+    .growth-scene[data-golden="true"] .growth-aura {
+      fill: rgba(255, 196, 60, 0.35);
+      filter: drop-shadow(0 0 10px rgba(255, 200, 70, 0.55));
+    }
+
+    .growth-scene[data-golden="true"] .growth-flower .petal {
+      fill: url(#golden-petal) !important;
+      stroke: rgba(255, 245, 200, 0.7);
+    }
+
+    .growth-scene[data-golden="true"] .growth-flower.is-on .growth-flower-inner {
+      animation: flower-sway 2.2s ease-in-out infinite, golden-pulse 1.8s ease-in-out infinite;
+      filter: drop-shadow(0 0 6px rgba(255, 200, 70, 0.85));
+    }
+
+    .growth-golden-sparkles {
+      position: absolute;
+      inset: 6% 8% 18%;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .growth-scene[data-golden="true"] .growth-golden-sparkles {
+      opacity: 1;
+    }
+
+    .growth-golden-sparkles i {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #ffe566;
+      box-shadow: 0 0 8px 2px rgba(255, 210, 80, 0.85);
+      animation: gold-spark 2.4s ease-in-out infinite;
+    }
+
+    .growth-golden-sparkles i:nth-child(1) { left: 46%; top: 18%; animation-delay: 0s; }
+    .growth-golden-sparkles i:nth-child(2) { left: 28%; top: 32%; animation-delay: 0.35s; }
+    .growth-golden-sparkles i:nth-child(3) { left: 66%; top: 28%; animation-delay: 0.7s; }
+    .growth-golden-sparkles i:nth-child(4) { left: 38%; top: 48%; animation-delay: 1s; }
+    .growth-golden-sparkles i:nth-child(5) { left: 58%; top: 46%; animation-delay: 1.3s; }
+    .growth-golden-sparkles i:nth-child(6) { left: 50%; top: 12%; animation-delay: 0.2s; width: 7px; height: 7px; }
+    .growth-golden-sparkles i:nth-child(7) { left: 22%; top: 52%; animation-delay: 1.6s; }
+    .growth-golden-sparkles i:nth-child(8) { left: 74%; top: 50%; animation-delay: 0.9s; }
+
+    .growth-caption.is-golden {
+      color: #b8860b;
+      text-shadow: 0 0 12px rgba(255, 200, 70, 0.35);
+    }
+
+    @keyframes gold-spark {
+      0%, 100% { opacity: 0.15; transform: scale(0.6) translateY(0); }
+      40% { opacity: 1; transform: scale(1.25) translateY(-6px); }
+      70% { opacity: 0.55; transform: scale(0.9) translateY(-2px); }
+    }
+
+    @keyframes golden-pulse {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 200, 70, 0.55)); }
+      50% { filter: drop-shadow(0 0 12px rgba(255, 215, 90, 1)); }
+    }
+
     .growth-fx {
       position: absolute;
       inset: 8% 10% 22%;
@@ -1535,6 +1707,12 @@
     <button type="button" class="brand" data-home aria-label="홈으로 이동">focus<span>now</span></button>
     <p class="brand-sub">결과가 아닌 오늘의 경험과 과정 기록.</p>
     <p class="brand-line">하루 단 1장의 사진이나 이미지, 단 1줄로 오늘 기록.</p>
+    <div class="share-bar" aria-label="공유">
+      <button type="button" class="gold" id="open-promo">황금 꽃 이벤트</button>
+      <button type="button" id="share-friend">친구에게 공유</button>
+      <button type="button" id="copy-link">링크 복사</button>
+    </div>
+    <p class="promo-copy-msg hidden" id="share-toast" aria-live="polite"></p>
     <div class="title-badge hidden" id="archive-title-badge" aria-live="polite">
       <span class="title-badge-name" id="archive-title-name"></span>
       <span class="title-badge-lv" id="archive-title-lv"></span>
@@ -1624,7 +1802,17 @@
           <div class="growth-fx" id="growth-fx" aria-hidden="true">
             <span></span><span></span><span></span><span></span><span></span><span></span>
           </div>
+          <div class="growth-golden-sparkles" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
           <svg class="growth-svg" viewBox="0 0 200 320" role="img" aria-hidden="true">
+            <defs>
+              <linearGradient id="golden-petal" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fff4b0" />
+                <stop offset="45%" stop-color="#ffd24a" />
+                <stop offset="100%" stop-color="#c99212" />
+              </linearGradient>
+            </defs>
             <ellipse class="growth-soil" cx="100" cy="292" rx="78" ry="18" />
             <ellipse class="growth-soil-top" cx="100" cy="286" rx="62" ry="10" opacity="0.55" />
             <circle class="growth-aura" cx="100" cy="268" r="28" />
@@ -1753,7 +1941,7 @@
         <button type="submit" class="submit">가입하기</button>
       </form>
 
-      <p class="auth-note">계정은 이 브라우저에만 저장됩니다</p>
+      <p class="auth-note">계정은 Firebase에 안전하게 저장됩니다</p>
     </section>
   </main>
 
@@ -1792,12 +1980,42 @@
     </div>
   </div>
 
+  <div class="confirm-overlay hidden" id="promo-overlay" role="presentation">
+    <div
+      class="confirm-dialog promo-dialog"
+      id="promo-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="promo-heading"
+      aria-describedby="promo-body"
+    >
+      <p class="promo-eyebrow">LIMITED · 선착순 50명</p>
+      <h2 id="promo-heading">선착순 50명에게 황금 꽃이 피어납니다</h2>
+      <p class="promo-body" id="promo-body">
+        지금 focusnow에 가입하면, 앞선 50명에게만 자라나는 꽃에 황금빛이 반짝이는 효과가 열려요.
+        친구에게도 알려주고 함께 심어보세요.
+      </p>
+      <p class="promo-remain" id="promo-remain">남은 자리 확인 중…</p>
+      <div class="promo-actions">
+        <button type="button" class="primary" id="promo-share">친구에게 공유하기</button>
+        <button type="button" id="promo-copy">사이트 링크 복사</button>
+        <button type="button" id="promo-join">가입하러 가기</button>
+        <button type="button" id="promo-close">닫기</button>
+      </div>
+      <p class="promo-copy-msg" id="promo-copy-msg" aria-live="polite"></p>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
   <script>
     const USERS_KEY = "focusnow_users";
     const SESSION_KEY = "focusnow_session";
+    const PROMO_KEY = "focusnow_promo_seen";
     const CAPTION_MAX = 20;
+    const GOLDEN_LIMIT = 50;
+    const SITE_URL = "https://focusnow-iota.vercel.app";
+    const SHARE_TEXT = "focusnow — 하루 사진 한 장, 한 줄로 오늘을 심어요. 선착순 50명에게 황금 꽃이 피어납니다!";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCvBTUQ0y9QhSQbgfxG9gcS8iJ0HSHNsRc",
@@ -1812,6 +2030,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const usersCol = db.collection("users");
+    const signupMetaRef = db.collection("meta").doc("signup");
 
     const authView = document.getElementById("auth-view");
     const appView = document.getElementById("app-view");
@@ -1865,6 +2084,17 @@
     const celebrateRankEl = document.getElementById("celebrate-rank");
     const celebrateSubEl = document.getElementById("celebrate-sub");
     const celebrateOkBtn = document.getElementById("celebrate-ok");
+    const promoOverlay = document.getElementById("promo-overlay");
+    const promoRemain = document.getElementById("promo-remain");
+    const promoCopyMsg = document.getElementById("promo-copy-msg");
+    const promoShareBtn = document.getElementById("promo-share");
+    const promoCopyBtn = document.getElementById("promo-copy");
+    const promoJoinBtn = document.getElementById("promo-join");
+    const promoCloseBtn = document.getElementById("promo-close");
+    const openPromoBtn = document.getElementById("open-promo");
+    const shareFriendBtn = document.getElementById("share-friend");
+    const copyLinkBtn = document.getElementById("copy-link");
+    const shareToast = document.getElementById("share-toast");
     const calTitle = document.getElementById("cal-title");
     const calDays = document.getElementById("cal-days");
     const calPrev = document.getElementById("cal-prev");
@@ -2053,6 +2283,10 @@
       const n = Math.max(0, Math.min(count, FLOWER_SPOTS.length));
       while (growthFlowers.firstChild) growthFlowers.removeChild(growthFlowers.firstChild);
       const svgNS = "http://www.w3.org/2000/svg";
+      const golden = hasGoldenFlower(currentUser());
+      const petalColors = golden
+        ? ["#fff1a8", "#ffd24a", "#f0b429", "#e8a317", "#ffe566", "#c99212"]
+        : PETAL_COLORS;
 
       for (let i = 0; i < n; i++) {
         const spot = FLOWER_SPOTS[i];
@@ -2065,7 +2299,7 @@
         const inner = document.createElementNS(svgNS, "g");
         inner.setAttribute("class", "growth-flower-inner");
 
-        for (let p = 0; p < PETAL_COLORS.length; p++) {
+        for (let p = 0; p < petalColors.length; p++) {
           const angle = p * 60;
           const petal = document.createElementNS(svgNS, "ellipse");
           petal.setAttribute("class", "petal");
@@ -2073,19 +2307,19 @@
           petal.setAttribute("cy", "-15");
           petal.setAttribute("rx", "8");
           petal.setAttribute("ry", "16");
-          petal.setAttribute("fill", PETAL_COLORS[p]);
+          petal.setAttribute("fill", petalColors[p]);
           petal.setAttribute("transform", "rotate(" + angle + " 0 0)");
           inner.appendChild(petal);
         }
 
         const centerOuter = document.createElementNS(svgNS, "circle");
         centerOuter.setAttribute("r", "7");
-        centerOuter.setAttribute("fill", "#ffe66d");
+        centerOuter.setAttribute("fill", golden ? "#fff8d0" : "#ffe66d");
         inner.appendChild(centerOuter);
 
         const centerInner = document.createElementNS(svgNS, "circle");
         centerInner.setAttribute("r", "3.5");
-        centerInner.setAttribute("fill", "#fff8e7");
+        centerInner.setAttribute("fill", golden ? "#fffef5" : "#fff8e7");
         inner.appendChild(centerInner);
 
         g.appendChild(inner);
@@ -2224,6 +2458,11 @@
       }
 
       growthScene.dataset.stage = stage;
+      const golden = hasGoldenFlower(currentUser());
+      growthScene.dataset.golden = golden ? "true" : "false";
+      if (golden && rank) {
+        caption = "황금 " + caption;
+      }
       growthScene.style.setProperty("--stem", String(stem));
       growthScene.style.setProperty("--leaf", String(leaf));
       growthScene.style.setProperty("--seed-split", String(seedSplit));
@@ -2231,6 +2470,7 @@
       growthScene.style.setProperty("--glow", String(glow));
       growthScene.style.setProperty("--seed-fade", String(seedFade));
       growthCaption.textContent = caption;
+      growthCaption.classList.toggle("is-golden", golden);
       growthDays.textContent = daysLabel;
       renderGrowthFlowers(flowers, leveled && stage === "flower");
       if (leveled) playGrowthFx();
@@ -2261,10 +2501,11 @@
         growthGuideNote.innerHTML = "지금 <strong>새싹 Lv." + rank.level + "</strong> · 14일까지 잎이 자라요.";
       } else if (rank.stage === "stem") {
         growthGuideNote.innerHTML = "지금 <strong>줄기 Lv." + rank.level + "</strong> · 21일까지 줄기가 뻗어요.";
-      } else if (rank.stage === "flower") {
+      } else       if (rank.stage === "flower") {
         growthGuideNote.innerHTML =
           "지금 <strong>꽃 Lv." + rank.level + "</strong> · 꽃 <strong>" +
-          rank.flowers + "</strong>송이 · 7레벨마다 +1";
+          rank.flowers + "</strong>송이 · 7레벨마다 +1" +
+          (hasGoldenFlower(currentUser()) ? " · <strong>황금 꽃</strong>" : "");
       }
     }
 
@@ -2316,7 +2557,12 @@
         localStorage.removeItem(SESSION_KEY);
         return;
       }
-      localStorage.setItem(SESSION_KEY, JSON.stringify({ id: user.id, name: user.name }));
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        id: user.id,
+        name: user.name,
+        goldenFlower: !!user.goldenFlower,
+        signupOrder: user.signupOrder || null
+      }));
     }
 
     function normalizeId(id) {
@@ -2326,7 +2572,16 @@
     function currentUser() {
       const session = getSession();
       if (!session || !session.id) return null;
-      return { id: session.id, name: session.name || session.id };
+      return {
+        id: session.id,
+        name: session.name || session.id,
+        goldenFlower: !!session.goldenFlower,
+        signupOrder: session.signupOrder || null
+      };
+    }
+
+    function hasGoldenFlower(user) {
+      return !!(user && user.goldenFlower);
     }
 
     function findLocalUser(id) {
@@ -2364,14 +2619,50 @@
 
     async function createRemoteUser({ id, name, password }) {
       const passwordHash = await hashPassword(id, password);
-      const payload = {
-        id,
-        name,
-        passwordHash,
-        createdAt: new Date().toISOString()
-      };
-      await usersCol.doc(id).set(payload);
+      const userRef = usersCol.doc(id);
+
+      const payload = await db.runTransaction(async (tx) => {
+        const existing = await tx.get(userRef);
+        if (existing.exists) {
+          throw new Error("USER_EXISTS");
+        }
+        const metaSnap = await tx.get(signupMetaRef);
+        const current = metaSnap.exists ? Number(metaSnap.data().count) || 0 : 0;
+        const signupOrder = current + 1;
+        const goldenFlower = signupOrder <= GOLDEN_LIMIT;
+        const next = {
+          id,
+          name,
+          passwordHash,
+          createdAt: new Date().toISOString(),
+          signupOrder,
+          goldenFlower
+        };
+        if (metaSnap.exists) {
+          tx.update(signupMetaRef, { count: signupOrder });
+        } else {
+          tx.set(signupMetaRef, { count: signupOrder });
+        }
+        tx.set(userRef, next);
+        return next;
+      });
+
       return payload;
+    }
+
+    async function getSignupCount() {
+      try {
+        const snap = await signupMetaRef.get();
+        if (!snap.exists) return 0;
+        return Number(snap.data().count) || 0;
+      } catch (_) {
+        return 0;
+      }
+    }
+
+    async function getGoldenRemaining() {
+      const count = await getSignupCount();
+      return Math.max(0, GOLDEN_LIMIT - count);
     }
 
     async function touchRemoteLogin(id, name) {
@@ -2780,10 +3071,14 @@
           return;
         }
 
-        await createRemoteUser({ id, name, password });
+        const created = await createRemoteUser({ id, name, password });
         upsertLocalUser({ id, name, password });
 
-        signupMsg.textContent = "가입 완료! 로그인해주세요.";
+        if (created.goldenFlower) {
+          signupMsg.textContent = "가입 완료! 선착순 황금 꽃 자격이 열렸어요. 로그인해주세요.";
+        } else {
+          signupMsg.textContent = "가입 완료! 로그인해주세요.";
+        }
         signupMsg.classList.add("ok");
         signupForm.reset();
         resetIdCheck();
@@ -2836,10 +3131,15 @@
         if (remoteOk) {
           await touchRemoteLogin(id, name);
         } else if (localOk && !remote) {
-          await migrateLocalUserToRemote(local);
+          remote = await migrateLocalUserToRemote(local);
         }
 
-        const user = { id, name };
+        const user = {
+          id,
+          name,
+          goldenFlower: !!(remote && remote.goldenFlower),
+          signupOrder: remote && remote.signupOrder ? remote.signupOrder : null
+        };
         upsertLocalUser({ id, name, password });
         setSession(user);
         loginForm.reset();
@@ -2881,8 +3181,116 @@
       if (e.target === celebrateOverlay) closeCelebrate();
     });
 
+    async function refreshPromoRemain() {
+      if (!promoRemain) return;
+      const left = await getGoldenRemaining();
+      if (left <= 0) {
+        promoRemain.textContent = "선착순 50명이 모두 채워졌어요";
+      } else {
+        promoRemain.textContent = "황금 꽃 남은 자리 " + left + "명";
+      }
+    }
+
+    async function openPromo(options) {
+      if (!promoOverlay) return;
+      if (promoCopyMsg) promoCopyMsg.textContent = "";
+      await refreshPromoRemain();
+      promoOverlay.classList.remove("hidden");
+      if (options && options.markSeen) {
+        try { sessionStorage.setItem(PROMO_KEY, "1"); } catch (_) {}
+      }
+      if (promoCloseBtn) promoCloseBtn.focus();
+    }
+
+    function closePromo() {
+      if (!promoOverlay) return;
+      promoOverlay.classList.add("hidden");
+    }
+
+    function showShareToast(msg, target) {
+      const el = target || shareToast;
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.remove("hidden");
+      clearTimeout(showShareToast._timer);
+      showShareToast._timer = setTimeout(() => {
+        if (el === shareToast) el.classList.add("hidden");
+        if (el === promoCopyMsg) el.textContent = "";
+      }, 2200);
+    }
+
+    async function copySiteLink(toastTarget) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(SITE_URL);
+        } else {
+          const input = document.createElement("input");
+          input.value = SITE_URL;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand("copy");
+          document.body.removeChild(input);
+        }
+        showShareToast("링크를 복사했어요", toastTarget);
+      } catch (_) {
+        showShareToast("복사에 실패했어요. 주소를 직접 공유해주세요", toastTarget);
+      }
+    }
+
+    async function shareWithFriend(toastTarget) {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "focusnow",
+            text: SHARE_TEXT,
+            url: SITE_URL
+          });
+          return;
+        } catch (err) {
+          if (err && err.name === "AbortError") return;
+        }
+      }
+      await copySiteLink(toastTarget);
+      showShareToast("공유가 안 되어 링크를 복사했어요", toastTarget);
+    }
+
+    if (openPromoBtn) {
+      openPromoBtn.addEventListener("click", () => openPromo());
+    }
+    if (shareFriendBtn) {
+      shareFriendBtn.addEventListener("click", () => shareWithFriend(shareToast));
+    }
+    if (copyLinkBtn) {
+      copyLinkBtn.addEventListener("click", () => copySiteLink(shareToast));
+    }
+    if (promoShareBtn) {
+      promoShareBtn.addEventListener("click", () => shareWithFriend(promoCopyMsg));
+    }
+    if (promoCopyBtn) {
+      promoCopyBtn.addEventListener("click", () => copySiteLink(promoCopyMsg));
+    }
+    if (promoJoinBtn) {
+      promoJoinBtn.addEventListener("click", () => {
+        closePromo();
+        showAuth();
+        switchTab("signup");
+      });
+    }
+    if (promoCloseBtn) {
+      promoCloseBtn.addEventListener("click", () => closePromo());
+    }
+    if (promoOverlay) {
+      promoOverlay.addEventListener("click", (e) => {
+        if (e.target === promoOverlay) closePromo();
+      });
+    }
+
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
+      if (promoOverlay && !promoOverlay.classList.contains("hidden")) {
+        closePromo();
+        return;
+      }
       if (!celebrateOverlay.classList.contains("hidden")) {
         closeCelebrate();
         return;
@@ -3020,6 +3428,13 @@
     const user = currentUser();
     if (!user) setSession(null);
     showHome(user);
+    try {
+      if (!sessionStorage.getItem(PROMO_KEY)) {
+        openPromo({ markSeen: true });
+      }
+    } catch (_) {
+      openPromo({ markSeen: false });
+    }
   </script>
 </body>
 </html>
