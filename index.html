@@ -1593,6 +1593,77 @@
       opacity: 1;
     }
 
+    .growth-rainbow-sparkles {
+      position: absolute;
+      inset: 4% 6% 16%;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .growth-scene[data-rainbow="true"] .growth-rainbow-sparkles {
+      opacity: 1;
+    }
+
+    .growth-scene[data-rainbow="true"] .growth-stem {
+      stroke: url(#rainbow-stem);
+      filter: drop-shadow(0 0 4px rgba(124, 180, 255, 0.55));
+    }
+
+    .growth-scene[data-rainbow="true"] .growth-leaf {
+      filter: drop-shadow(0 0 5px rgba(180, 120, 255, 0.45));
+    }
+
+    .growth-scene[data-rainbow="true"] .growth-aura {
+      fill: rgba(140, 180, 255, 0.28);
+      filter: drop-shadow(0 0 12px rgba(255, 120, 200, 0.45));
+    }
+
+    .growth-scene[data-rainbow="true"][data-stage="flower"] .growth-flower.is-on .growth-flower-inner {
+      animation: flower-sway 2.2s ease-in-out infinite, rainbow-glow 2.4s linear infinite;
+    }
+
+    .growth-rainbow-sparkles i {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      animation: rainbow-spark 2.6s ease-in-out infinite;
+    }
+
+    .growth-rainbow-sparkles i:nth-child(1) { left: 48%; top: 14%; background: #ff4d6d; animation-delay: 0s; }
+    .growth-rainbow-sparkles i:nth-child(2) { left: 30%; top: 26%; background: #ff9f1c; animation-delay: 0.25s; }
+    .growth-rainbow-sparkles i:nth-child(3) { left: 68%; top: 24%; background: #ffd60a; animation-delay: 0.5s; }
+    .growth-rainbow-sparkles i:nth-child(4) { left: 24%; top: 42%; background: #80ed99; animation-delay: 0.75s; }
+    .growth-rainbow-sparkles i:nth-child(5) { left: 74%; top: 40%; background: #4cc9f0; animation-delay: 1s; }
+    .growth-rainbow-sparkles i:nth-child(6) { left: 42%; top: 36%; background: #c77dff; animation-delay: 1.2s; }
+    .growth-rainbow-sparkles i:nth-child(7) { left: 56%; top: 20%; background: #ff4d6d; animation-delay: 1.45s; width: 8px; height: 8px; }
+    .growth-rainbow-sparkles i:nth-child(8) { left: 36%; top: 52%; background: #4cc9f0; animation-delay: 1.7s; }
+    .growth-rainbow-sparkles i:nth-child(9) { left: 62%; top: 50%; background: #ffd60a; animation-delay: 0.9s; }
+    .growth-rainbow-sparkles i:nth-child(10) { left: 50%; top: 8%; background: #c77dff; animation-delay: 0.15s; }
+
+    .growth-caption.is-rainbow {
+      background: linear-gradient(90deg, #ff4d6d, #ff9f1c, #ffd60a, #80ed99, #4cc9f0, #c77dff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
+
+    @keyframes rainbow-spark {
+      0%, 100% { opacity: 0.2; transform: scale(0.55) translateY(0); }
+      45% { opacity: 1; transform: scale(1.3) translateY(-8px); }
+      70% { opacity: 0.6; transform: scale(0.9) translateY(-3px); }
+    }
+
+    @keyframes rainbow-glow {
+      0% { filter: drop-shadow(0 0 4px #ff4d6d); }
+      20% { filter: drop-shadow(0 0 6px #ff9f1c); }
+      40% { filter: drop-shadow(0 0 6px #ffd60a); }
+      60% { filter: drop-shadow(0 0 6px #80ed99); }
+      80% { filter: drop-shadow(0 0 6px #4cc9f0); }
+      100% { filter: drop-shadow(0 0 4px #c77dff); }
+    }
+
     .growth-golden-sparkles i {
       position: absolute;
       width: 5px;
@@ -1853,12 +1924,22 @@
           <div class="growth-golden-sparkles" aria-hidden="true">
             <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
           </div>
+          <div class="growth-rainbow-sparkles" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
           <svg class="growth-svg" viewBox="0 0 200 320" role="img" aria-hidden="true">
             <defs>
               <linearGradient id="golden-petal" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#fff4b0" />
                 <stop offset="45%" stop-color="#ffd24a" />
                 <stop offset="100%" stop-color="#c99212" />
+              </linearGradient>
+              <linearGradient id="rainbow-stem" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="#2f6b4f" />
+                <stop offset="25%" stop-color="#4cc9f0" />
+                <stop offset="50%" stop-color="#80ed99" />
+                <stop offset="75%" stop-color="#c77dff" />
+                <stop offset="100%" stop-color="#ff4d6d" />
               </linearGradient>
             </defs>
             <ellipse class="growth-soil" cx="100" cy="292" rx="78" ry="18" />
@@ -2080,6 +2161,7 @@
     const PROMO_KEY = "focusnow_promo_seen";
     const CAPTION_MAX = 20;
     const GOLDEN_LIMIT = 50;
+    const STREAK7_LIMIT = 100;
     const SITE_URL = "https://focusnow-iota.vercel.app";
     const SHARE_TEXT = "focusnow — 하루 사진 한 장, 한 줄로 오늘을 심어요. 선착순 50명에게 황금 꽃이 피어납니다!";
 
@@ -2097,6 +2179,7 @@
     const db = firebase.firestore();
     const usersCol = db.collection("users");
     const signupMetaRef = db.collection("meta").doc("signup");
+    const streak7MetaRef = db.collection("meta").doc("streak7");
 
     const authView = document.getElementById("auth-view");
     const appView = document.getElementById("app-view");
@@ -2409,9 +2492,20 @@
     }
 
     function openCelebrate(info) {
-      if (!info || !info.nextRank || !celebrateOverlay) return;
+      if (!info || !celebrateOverlay) return;
       const next = info.nextRank;
       const prev = info.prevRank;
+
+      if (info.rainbowAward) {
+        celebrateHeading.textContent = "무지개 특전 획득!";
+        celebrateRankEl.textContent = "첫 새싹 100 · #" + info.rainbowAward.streak7Order;
+        celebrateSubEl.textContent = "7일 연속 기록 선착순 보상 · 새싹·줄기·꽃에 무지개가 피어나요";
+        celebrateOverlay.classList.remove("hidden");
+        celebrateOkBtn.focus();
+        return;
+      }
+
+      if (!next) return;
       const titleChanged = !prev || prev.title !== next.title;
       const isFirst = !prev;
       const flowerGained = next.title === "꽃" && (!prev || (prev.flowers || 0) < (next.flowers || 0));
@@ -2526,10 +2620,16 @@
       }
 
       growthScene.dataset.stage = stage;
-      const golden = hasGoldenFlower(currentUser());
+      const me = currentUser();
+      const golden = hasGoldenFlower(me);
+      const rainbow = hasRainbowAura(me) && (stage === "sprout" || stage === "stem" || stage === "flower");
       growthScene.dataset.golden = golden ? "true" : "false";
+      growthScene.dataset.rainbow = rainbow ? "true" : "false";
       if (golden && rank) {
         caption = "황금 " + caption;
+      }
+      if (hasRainbowAura(me) && rank && (stage === "sprout" || stage === "stem" || stage === "flower")) {
+        caption = "무지개 " + caption;
       }
       growthScene.style.setProperty("--stem", String(stem));
       growthScene.style.setProperty("--leaf", String(leaf));
@@ -2538,7 +2638,8 @@
       growthScene.style.setProperty("--glow", String(glow));
       growthScene.style.setProperty("--seed-fade", String(seedFade));
       growthCaption.textContent = caption;
-      growthCaption.classList.toggle("is-golden", golden);
+      growthCaption.classList.toggle("is-golden", golden && !rainbow);
+      growthCaption.classList.toggle("is-rainbow", rainbow);
       growthDays.textContent = daysLabel;
       renderGrowthFlowers(flowers, leveled && stage === "flower");
       if (leveled) playGrowthFx();
@@ -2564,16 +2665,20 @@
         return;
       }
       if (rank.stage === "seed") {
-        growthGuideNote.innerHTML = "지금 <strong>씨앗 Lv." + rank.level + "</strong> · 7일까지 새순이 커져요.";
+        growthGuideNote.innerHTML = "지금 <strong>씨앗 Lv." + rank.level + "</strong> · 7일까지 새순이 커져요." +
+          (hasRainbowAura(currentUser()) ? " · <strong>첫 새싹 100</strong> 예약됨" : "");
       } else if (rank.stage === "sprout") {
-        growthGuideNote.innerHTML = "지금 <strong>새싹 Lv." + rank.level + "</strong> · 14일까지 잎이 자라요.";
+        growthGuideNote.innerHTML = "지금 <strong>새싹 Lv." + rank.level + "</strong> · 14일까지 잎이 자라요." +
+          (hasRainbowAura(currentUser()) ? " · <strong>무지개 특전</strong>" : "");
       } else if (rank.stage === "stem") {
-        growthGuideNote.innerHTML = "지금 <strong>줄기 Lv." + rank.level + "</strong> · 21일까지 줄기가 뻗어요.";
-      } else       if (rank.stage === "flower") {
+        growthGuideNote.innerHTML = "지금 <strong>줄기 Lv." + rank.level + "</strong> · 21일까지 줄기가 뻗어요." +
+          (hasRainbowAura(currentUser()) ? " · <strong>무지개 특전</strong>" : "");
+      } else if (rank.stage === "flower") {
         growthGuideNote.innerHTML =
           "지금 <strong>꽃 Lv." + rank.level + "</strong> · 꽃 <strong>" +
           rank.flowers + "</strong>송이 · 7레벨마다 +1" +
-          (hasGoldenFlower(currentUser()) ? " · <strong>황금 꽃</strong>" : "");
+          (hasGoldenFlower(currentUser()) ? " · <strong>황금 꽃</strong>" : "") +
+          (hasRainbowAura(currentUser()) ? " · <strong>무지개</strong>" : "");
       }
     }
 
@@ -2629,7 +2734,9 @@
         id: user.id,
         name: user.name,
         goldenFlower: !!user.goldenFlower,
-        signupOrder: user.signupOrder || null
+        signupOrder: user.signupOrder || null,
+        rainbowAura: !!user.rainbowAura,
+        streak7Order: user.streak7Order || null
       }));
     }
 
@@ -2644,12 +2751,18 @@
         id: session.id,
         name: session.name || session.id,
         goldenFlower: !!session.goldenFlower,
-        signupOrder: session.signupOrder || null
+        signupOrder: session.signupOrder || null,
+        rainbowAura: !!session.rainbowAura,
+        streak7Order: session.streak7Order || null
       };
     }
 
     function hasGoldenFlower(user) {
       return !!(user && user.goldenFlower);
+    }
+
+    function hasRainbowAura(user) {
+      return !!(user && user.rainbowAura);
     }
 
     function findLocalUser(id) {
@@ -2731,6 +2844,78 @@
     async function getGoldenRemaining() {
       const count = await getSignupCount();
       return Math.max(0, GOLDEN_LIMIT - count);
+    }
+
+    async function claimRainbowAura(userId) {
+      const id = normalizeId(userId);
+      if (!id) return null;
+      const user = currentUser();
+      if (user && user.rainbowAura) return null;
+
+      try {
+        const result = await db.runTransaction(async (tx) => {
+          const userRef = usersCol.doc(id);
+          const userSnap = await tx.get(userRef);
+          if (!userSnap.exists) return null;
+          const data = userSnap.data();
+          if (data.rainbowAura) {
+            return {
+              already: true,
+              rainbowAura: true,
+              streak7Order: data.streak7Order || null
+            };
+          }
+
+          const metaSnap = await tx.get(streak7MetaRef);
+          const current = metaSnap.exists ? Number(metaSnap.data().count) || 0 : 0;
+          if (current >= STREAK7_LIMIT) {
+            return { full: true };
+          }
+
+          const streak7Order = current + 1;
+          const streak7At = new Date().toISOString();
+          tx.update(userRef, {
+            rainbowAura: true,
+            streak7Order: streak7Order,
+            streak7At: streak7At
+          });
+          if (metaSnap.exists) {
+            tx.update(streak7MetaRef, { count: streak7Order });
+          } else {
+            tx.set(streak7MetaRef, { count: streak7Order });
+          }
+          return {
+            awarded: true,
+            rainbowAura: true,
+            streak7Order: streak7Order,
+            streak7At: streak7At
+          };
+        });
+
+        if (result && result.awarded) {
+          const session = currentUser();
+          if (session && session.id === id) {
+            setSession({
+              ...session,
+              rainbowAura: true,
+              streak7Order: result.streak7Order
+            });
+          }
+        } else if (result && result.already) {
+          const session = currentUser();
+          if (session && session.id === id) {
+            setSession({
+              ...session,
+              rainbowAura: true,
+              streak7Order: result.streak7Order
+            });
+          }
+        }
+        return result;
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
     }
 
     async function touchRemoteLogin(id, name) {
@@ -3206,12 +3391,22 @@
           id,
           name,
           goldenFlower: !!(remote && remote.goldenFlower),
-          signupOrder: remote && remote.signupOrder ? remote.signupOrder : null
+          signupOrder: remote && remote.signupOrder ? remote.signupOrder : null,
+          rainbowAura: !!(remote && remote.rainbowAura),
+          streak7Order: remote && remote.streak7Order ? remote.streak7Order : null
         };
         upsertLocalUser({ id, name, password });
         setSession(user);
         loginForm.reset();
         showHome(user);
+
+        if (getDisplayStreak(id) >= 7 && !user.rainbowAura) {
+          const award = await claimRainbowAura(id);
+          if (award && award.awarded) {
+            showHome(currentUser());
+            openCelebrate({ rainbowAward: award, days: getDisplayStreak(id) });
+          }
+        }
       } catch (err) {
         console.error(err);
         loginMsg.textContent = "로그인에 실패했습니다. 잠시 후 다시 시도하세요.";
@@ -3268,6 +3463,11 @@
     function closeWelcome() {
       if (!welcomeOverlay) return;
       welcomeOverlay.classList.add("hidden");
+      const u = currentUser();
+      if (u) {
+        showWrite(u);
+        return;
+      }
       try {
         if (!sessionStorage.getItem(PROMO_KEY)) {
           openPromo({ markSeen: true });
@@ -3421,7 +3621,7 @@
       renderArchiveGrid(user ? user.id : null);
     });
 
-    registerBtn.addEventListener("click", () => {
+    registerBtn.addEventListener("click", async () => {
       registerMsg.className = "register-msg";
       registerMsg.textContent = "";
 
@@ -3450,8 +3650,20 @@
 
       registerMsg.textContent = "오늘의 기록이 등록되었습니다.";
       registerMsg.classList.add("ok");
+
+      let rainbowAward = null;
+      const session = currentUser();
+      if (session) {
+        const days = getDisplayStreak(session.id);
+        if (days >= 7 && !session.rainbowAura) {
+          rainbowAward = await claimRainbowAura(session.id);
+        }
+      }
+
       showHome(currentUser());
-      if (result.celebration) {
+      if (rainbowAward && rainbowAward.awarded) {
+        openCelebrate({ rainbowAward: rainbowAward, days: getDisplayStreak(session.id) });
+      } else if (result.celebration) {
         openCelebrate(result.celebration);
       }
     });

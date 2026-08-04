@@ -7,11 +7,12 @@ service cloud.firestore {
     //
     // Collection: users/{userId}
     //   id, name, passwordHash, createdAt
-    //   lastLoginAt? (optional)
-    //   signupOrder?, goldenFlower? (required on new signups)
+    //   lastLoginAt?
+    //   signupOrder?, goldenFlower? (new signups)
+    //   streak7Order?, rainbowAura?, streak7At? (first 100 to hit 7-day streak)
     //
-    // Collection: meta/signup
-    //   count: int (increment-only signup counter)
+    // Collection: meta/signup { count }
+    // Collection: meta/streak7 { count }
     // ===============================================================
 
     function isValidUserId(userId) {
@@ -59,6 +60,34 @@ service cloud.firestore {
       );
     }
 
+    function hasValidRainbowClaim(data) {
+      return data.rainbowAura == true
+        && data.streak7Order is int
+        && data.streak7Order >= 1
+        && data.streak7Order <= 100
+        && data.streak7At is string;
+    }
+
+    function rainbowFieldsOk() {
+      // Already claimed: immutable
+      if ('rainbowAura' in resource.data) {
+        return request.resource.data.rainbowAura == resource.data.rainbowAura
+          && request.resource.data.streak7Order == resource.data.streak7Order
+          && (
+            (!('streak7At' in resource.data) && !('streak7At' in request.resource.data))
+            || request.resource.data.streak7At == resource.data.streak7At
+          );
+      }
+      // Not claiming rainbow this update
+      if (!('rainbowAura' in request.resource.data)
+        && !('streak7Order' in request.resource.data)
+        && !('streak7At' in request.resource.data)) {
+        return true;
+      }
+      // First-time claim
+      return hasValidRainbowClaim(request.resource.data);
+    }
+
     match /users/{userId} {
       allow get: if isValidUserId(userId);
       allow list: if false;
@@ -66,7 +95,10 @@ service cloud.firestore {
       allow create: if isValidUserId(userId)
         && isValidNewUser(request.resource.data)
         && request.resource.data.id == userId
-        && !('lastLoginAt' in request.resource.data);
+        && !('lastLoginAt' in request.resource.data)
+        && !('rainbowAura' in request.resource.data)
+        && !('streak7Order' in request.resource.data)
+        && !('streak7At' in request.resource.data);
 
       allow update: if isValidUserId(userId)
         && hasBaseUserFields(request.resource.data)
@@ -74,22 +106,23 @@ service cloud.firestore {
         && request.resource.data.passwordHash == resource.data.passwordHash
         && request.resource.data.createdAt == resource.data.createdAt
         && goldenFieldsUnchanged()
+        && rainbowFieldsOk()
         && request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['lastLoginAt', 'name']);
+            .hasOnly(['lastLoginAt', 'name', 'rainbowAura', 'streak7Order', 'streak7At']);
 
       allow delete: if false;
     }
 
     match /meta/{docId} {
-      allow get: if docId == 'signup';
+      allow get: if docId == 'signup' || docId == 'streak7';
       allow list: if false;
 
-      allow create: if docId == 'signup'
+      allow create: if (docId == 'signup' || docId == 'streak7')
         && request.resource.data.keys().hasOnly(['count'])
         && request.resource.data.count is int
         && request.resource.data.count == 1;
 
-      allow update: if docId == 'signup'
+      allow update: if (docId == 'signup' || docId == 'streak7')
         && request.resource.data.keys().hasOnly(['count'])
         && request.resource.data.count is int
         && request.resource.data.count == resource.data.count + 1;
