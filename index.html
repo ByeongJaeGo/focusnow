@@ -1335,6 +1335,54 @@
       color: #8a6a12;
     }
 
+    .welcome-dialog {
+      width: min(100%, 360px);
+      text-align: center;
+    }
+
+    .welcome-dialog .welcome-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.55rem;
+    }
+
+    .welcome-dialog h2 {
+      font-family: "Syne", sans-serif;
+      font-size: 1.18rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.4;
+      margin-bottom: 0.7rem;
+      color: var(--ink);
+    }
+
+    .welcome-dialog .welcome-body {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: var(--muted);
+      margin-bottom: 1.15rem;
+    }
+
+    .welcome-dialog .welcome-ok {
+      width: 100%;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.75rem 0.5rem;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: filter 0.2s ease;
+    }
+
+    .welcome-dialog .welcome-ok:hover {
+      filter: brightness(1.05);
+    }
+
     /* 성장 식물 장면 */
     .growth-scene {
       width: 100%;
@@ -1980,6 +2028,24 @@
     </div>
   </div>
 
+  <div class="confirm-overlay hidden" id="welcome-overlay" role="presentation">
+    <div
+      class="confirm-dialog welcome-dialog"
+      id="welcome-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="welcome-heading"
+      aria-describedby="welcome-body"
+    >
+      <p class="welcome-eyebrow">focusnow</p>
+      <h2 id="welcome-heading">오늘도 소중한 하루를 기록하러 오셨군요!</h2>
+      <p class="welcome-body" id="welcome-body">
+        추억이 될 사진과 간단한 기록을 해보세요!
+      </p>
+      <button type="button" class="welcome-ok" id="welcome-ok">네, 기록할게요</button>
+    </div>
+  </div>
+
   <div class="confirm-overlay hidden" id="promo-overlay" role="presentation">
     <div
       class="confirm-dialog promo-dialog"
@@ -2084,6 +2150,8 @@
     const celebrateRankEl = document.getElementById("celebrate-rank");
     const celebrateSubEl = document.getElementById("celebrate-sub");
     const celebrateOkBtn = document.getElementById("celebrate-ok");
+    const welcomeOverlay = document.getElementById("welcome-overlay");
+    const welcomeOkBtn = document.getElementById("welcome-ok");
     const promoOverlay = document.getElementById("promo-overlay");
     const promoRemain = document.getElementById("promo-remain");
     const promoCopyMsg = document.getElementById("promo-copy-msg");
@@ -3191,6 +3259,24 @@
       }
     }
 
+    function openWelcome() {
+      if (!welcomeOverlay) return;
+      welcomeOverlay.classList.remove("hidden");
+      if (welcomeOkBtn) welcomeOkBtn.focus();
+    }
+
+    function closeWelcome() {
+      if (!welcomeOverlay) return;
+      welcomeOverlay.classList.add("hidden");
+      try {
+        if (!sessionStorage.getItem(PROMO_KEY)) {
+          openPromo({ markSeen: true });
+        }
+      } catch (_) {
+        openPromo({ markSeen: false });
+      }
+    }
+
     async function openPromo(options) {
       if (!promoOverlay) return;
       if (promoCopyMsg) promoCopyMsg.textContent = "";
@@ -3254,6 +3340,15 @@
       showShareToast("공유가 안 되어 링크를 복사했어요", toastTarget);
     }
 
+    if (welcomeOkBtn) {
+      welcomeOkBtn.addEventListener("click", () => closeWelcome());
+    }
+    if (welcomeOverlay) {
+      welcomeOverlay.addEventListener("click", (e) => {
+        if (e.target === welcomeOverlay) closeWelcome();
+      });
+    }
+
     if (openPromoBtn) {
       openPromoBtn.addEventListener("click", () => openPromo());
     }
@@ -3287,6 +3382,10 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
+      if (welcomeOverlay && !welcomeOverlay.classList.contains("hidden")) {
+        closeWelcome();
+        return;
+      }
       if (promoOverlay && !promoOverlay.classList.contains("hidden")) {
         closePromo();
         return;
@@ -3428,13 +3527,7 @@
     const user = currentUser();
     if (!user) setSession(null);
     showHome(user);
-    try {
-      if (!sessionStorage.getItem(PROMO_KEY)) {
-        openPromo({ markSeen: true });
-      }
-    } catch (_) {
-      openPromo({ markSeen: false });
-    }
+    openWelcome();
   </script>
 </body>
 </html>
